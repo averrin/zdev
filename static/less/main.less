@@ -1,0 +1,140 @@
+@import "colors.less";
+@import "tablesorter.less";
+/*@import "datepicker.less";*/
+
+#ddl {
+	height: 200px;
+}
+
+img#logo{
+	margin-bottom: -28px;
+	margin-top: -20px;
+}
+
+#about ul li, #help ul li {
+	margin-top: 6px;
+}
+
+#login {
+	margin: 20px auto;
+}
+
+.help-block.error {
+	color: #B94A48;
+}
+pre.prettyprint {
+	padding: 6px !important;
+	overflow-y: auto;
+}
+
+ul.dbs {
+	list-style-image: url('/static/images/db.png')
+}
+
+table {
+	td {
+		vertical-align: middle;
+	}
+	td.pdm_stored {
+		color: @green;
+	}
+	td.accepted {
+		color: @blue;
+	}
+	td.created {
+		color: @orange;
+	}
+	td.tmp_rec {
+		color: @grayLight;
+	}
+	td.fast_upd {
+		color: @red;
+	}
+	pre {
+		max-height: 412px;
+	}
+
+	tr.pdm_stored td {
+		background-color: @successBackground;
+	}
+	tr.accepted td {
+		background-color: @infoBackground;
+	}
+	tr.pandora {
+		background-color: lighten(@orange, 30%);
+	}
+	tr.tmp_rec {
+		background-color: lightgray;
+	}
+	tr.fast_upd {
+		background-color: @errorBackground;
+	}
+}
+
+#state_filter{
+	float: right;
+	margin-bottom: 6px;
+}
+
+.hidden{
+	display: none;
+}
+
+.styled {
+	font-family: 'Fredericka the Great', cursive;
+	font-size: 13pt;
+}
+.brand {
+	font-family: 'Fredericka the Great', cursive;
+	font-size: 16pt;
+}
+
+#filter-group {
+	float: right;
+	margin-left: 6px;
+	ul.dropdown-menu {
+		padding: 8px;
+	}
+}
+
+#date_filter{
+	float: left;
+	/*margin-left: 6px;*/
+}
+
+#history {
+	margin-top: 60px;
+}
+
+tr.absent td{
+	text-decoration: line-through;
+	color: @errorText;
+	background-color: @errorBackground !important;
+}
+
+#abra_bases {
+	thead {
+		th:nth-child(5) {
+	    	width: 120px;
+		}
+		th:nth-child(6) {
+	    	width: 130px;
+		}
+	}
+	tr td:nth-child(6){
+		text-align:center;
+	}
+}
+
+.right{
+	float: right;
+}
+.left{
+	float: left;
+}
+.hidden{
+	display: none;
+}
+td.centred{
+	text-align: center;
+}

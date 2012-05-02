@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+
+{% block title %}
+      Отправка файлов в релиз
+{% endblock title %}
+
+{% block content %}
+
+	<h1>Информация обновлена успешно.</h1>
+
+	<p>По таску <a href="http://redmine.prog.zet/issues/{{task_num}}">#{{task_num}}</a> добавлены файлы:</p>
+	<ul>
+		{% for file, rev in files %}
+			<li>{{file}} &mdash; {{rev}}</li>
+		{% endfor %}
+	</ul>
+
+<div class="form-actions">
+	<button type="submit" class="btn" onclick="location = '{% url r_index %}'">Назад</button>
+	<button type="submit" class="btn" onclick="location = '{% url r_list %}'">К истории</button>
+</div>
+
+{% endblock content %}

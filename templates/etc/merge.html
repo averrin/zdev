@@ -1,0 +1,98 @@
+{% extends "index.html" %}
+
+{% block title %}
+      Создание MERGE-сценариев
+{% endblock title %}
+
+{% block content %}
+<!-- call p_get_merge_script (pr_table_name varchar(50), pr_exclude_cols_ins varchar(255), pr_exclude_cols_upd varchar(255), pr_sql_where text, pr_target_db varchar(50)) return text; -->
+      <form class="form-horizontal" method="POST" id="merge_form">
+        <fieldset>
+          <legend>Создание MERGE-сценариев</legend>
+          <div class="control-group">
+            <label class="control-label" for="db_name">Имя базы данных источника</label>
+            <div class="controls">
+              <select name="db_name" id="db_name" class="input-xlarge"  onchange="Dajaxice.etc.get_tables(Dajax.process,{'base':this.value})">
+                {% for base in bases %}
+                  <option value="{{base.db_name}}" {% if base.db_name == 'UTM' %} selected {% endif %}>{{base.db_name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="table_name">Имя таблицы источника</label>
+            <div class="controls">
+              <select name="table_name" id="table_name" class="input-xlarge" onchange="Dajaxice.etc.get_fields(Dajax.process,{'table':this.value, 'base':$('#db_name').val()})" required>
+              	<option value="">---</option>
+                {% for table in tables %}
+                  <option value="{{table}}">{{table}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="multiSelect">Исключить из INSERT</label>
+            <div class="controls">
+              <select multiple="multiple" id="fields_ins" name="fields_ins">
+              </select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="multiSelect">Исключить из UPDATE</label>
+            <div class="controls">
+              <select multiple="multiple" id="fields_upd" name="fields_upd">
+              </select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="where">Конструкция WHERE</label>
+            <div class="controls">
+              <textarea type="text" class="input-xlarge span6" id="where" name="where"></textarea>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="db_name_target">Имя целевой базы данных</label>
+            <div class="controls">
+              <select name="db_name_target" id="db_name_target" class="input-xlarge">
+                {% for base in bases %}
+                  <option value="{{base.db_name}}" {% if base.db_name == 'UTM' %} selected {% endif %}>{{base.db_name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Отправить</button>
+            <button type="reset" class="btn">Очистить</button>
+          </div>
+        </fieldset>
+        {% csrf_token %}
+      </form>
+
+      <pre class="prettyprint well hidden" id="output"></pre>
+
+{% endblock content %}
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+
+
+        $("#merge_form").submit (e) ->
+            console.log "ZDev:  Sending form." if debug is true
+            e.preventDefault()
+            loader = "<div style=\"vertical-align: middle; margin: 80px 40%;\"><img src=\"/static/images/loader.gif\" style=\"height:64px\"/></div>"
+            $("#output").html loader
+            data = $("#merge_form").serialize()
+            Dajaxice.etc.get_query root.commits_callback, form:data
+
+        root.commits_callback = (data) ->
+            Dajax.process(data)
+            prettyPrint()
+            console.log "ZDev:  Done." if debug is true
+
+    {# </script> #}
+{% endblock endjs %}

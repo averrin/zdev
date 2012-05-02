@@ -1,0 +1,41 @@
+{% extends 'index.html' %}
+
+{% block title %}
+      Нужные базы
+{% endblock title %}
+
+{% block content %}
+
+<h2>Базы данных на сервере разработки</h2>
+
+<table class="table table-bordered table-condensed table-striped" id="abra_bases">
+    <thead>
+        <th>Имя</th>
+        <th>Описание</th>
+        <th>Резервная копия</th>
+        <th>Разработчик</th>
+        <th>Дата создания</th>
+        <th>Создавать backup</th>
+    </thead>
+    <tbody>
+        {% for db in bases %}
+        <tr {% if db.db_is_absent %}class=absent{%endif%}>
+            <td><strong>{{db.db_name}}</strong></td>
+            <td>{{db.db_desc|default:''}}</td>
+            <td>{{db.backup_file_name|default:''}}</td>
+            <td>{{db.developer_name|default:''}}</td>
+            <td>{{db.create_time|date:'Y-m-d H:i:s'}}</td>
+            <td>{% if db.is_need_backup %}<i class="icon-ok"></i>{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+        $("#abra_bases").tablesorter()
+    {# </script> #}
+{% endblock endjs %}

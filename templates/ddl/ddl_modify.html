@@ -1,0 +1,20 @@
+{% extends "index.html" %}
+
+{% block title %}
+      Удаление записи
+{% endblock title %}
+
+{% block content %}
+
+<p>
+	{% if success %}
+		Запись "<strong>{{guid}}</strong>" удалена успешно.
+	{% else %}
+		Записи "<strong>{{guid}}</strong>" в базе не найдено.
+	{% endif %}
+</p>
+<div class="form-actions">
+	<button type="submit" class="btn" onclick="location = '{% url ddl_list %}'">К истории</button>
+</div>
+
+{% endblock content %}

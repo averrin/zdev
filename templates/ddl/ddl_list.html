@@ -1,0 +1,211 @@
+{% extends 'index.html' %}
+
+{% block title %}
+    Список отправленных изменений
+{% endblock title %}
+
+{% block content %}
+
+<h2>Список отправленных изменений</h2>
+    <div class="well">
+        По умолчанию список отображает только сегодняшние изменения.<br>
+        Для поиска по номеру таска введите номер и нажмите <code>Enter</code>.
+    </div>
+<div class="btn-group" id="filter-group">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+        Фильтры
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li>
+            <select name="db_name" id="db_name">
+                <option value="">Все базы</option>
+                {% for base in bases %}
+                    <option value="{{base.db_name}}">{{base.db_name}}</option>
+                {% endfor %}
+            </select>
+        </li>
+        <li>
+            <select name="obj_type" id="obj_type">
+                <option value="">Любой тип объекта</option>
+                {% for type in types %}
+                    <option value="{{type.obj_type}}">{{type.obj_type_desc}}</option>
+                {% endfor %}
+            </select>
+        </li>
+        <li>
+            <select name="hist_type" id="hist_type">
+                <option value="">Любой тип записи</option>
+                {% for kind in kinds %}
+                  <option value="{{kind.pdm_sync_kind}}">{{kind.pdm_sync_kind_desc}}</option>
+                {% endfor %}
+            </select>
+        </li>
+    </ul>
+</div>
+<div id="date_filter">
+<input type="text" class="input-small" value="{% now 'd.m.y' %}" data-date-format="dd.mm.yy" id="dp1">
+&nbsp;&mdash;&nbsp;
+<input type="text" class="input-small" value="{% now 'd.m.y' %}" data-date-format="dd.mm.yy" id="dp2">
+</div>
+
+    <div class="btn-group" data-toggle="buttons-checkbox" id="state_filter" style="padding-top: 4px;">
+        {% for state in states %}
+            <button class="btn active btn-mini" cid='{{state.cid}}'>{{state.state_name}}</button>
+        {% endfor %}
+<!--         <button class="btn active" cid='created'>Инициировано</button>
+        <button class="btn active" cid='accepted'>Подтверждено</button>
+        <button class="btn active" cid='pdm_stored'>Записано в модель</button>
+        <button class="btn active" cid='tmp_rec'>Временная</button>
+        <button class="btn active" cid="fast_upd">Срочное</button>
+        <button class="btn active" cid="pandora">Пандора</button> -->
+    </div>
+<div style="float: left">
+<div class="input-prepend" style="margin-left: 6px;
+width: 100px;
+display: inline-block;">
+    <span class="add-on">#</span><input class="input-mini" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+</div>
+</div>
+<div id="output">
+    <!-- place for table -->
+    {# include "ddl/list.html" #}
+</div>
+
+<div id="dialogs">
+    <!-- place for dialogs -->
+    <div class="modal" id="modify_dialog" style="display: none;">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3>Изменение состояния</h3>
+            </div>
+            <div class="modal-body">
+                <p>Объект: <strong class="guid"><%=guid%></strong></p>
+                <p>
+                    Изменить состояние на:
+                    <select name="state" id="state">
+                        {% for state in states %}
+                            {% if state.cid in allowed_states %}
+                                <option value="{{state.cid}}">{{state.state_name}}</option>
+                            {% endif %}
+                        {% endfor %}
+<!--                         <option value="temp">Временная</option>
+                        <option value="fast">Срочная</option>
+                        <option value="normal">Новая</option>
+                        <option value="pandora">Установка на пандору</option> -->
+                    </select>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-danger" data-dismiss="modal">Отмена</a>
+                <a href="#" class="btn btn-primary" onclick="modify_confirmed($('#state').val(),$('#modify_dialog .guid').html())">Сохранить</a>
+            </div>
+        </div>
+</div>
+
+<!-- TODO: turn this dialog into template -->
+<div class="modal" id="show_guid_dialog" style="display: none;">
+    <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h3>GUID</h3>
+    </div>
+    <div class="modal-body">
+        <p>GUID: <strong class='guid'></strong></p>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" onclick="$('#show_guid_dialog').modal('hide')">Ok</a>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+        template = _.template '
+        <div class="modal" id="dialog" style="display: none;">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3><%=title%></h3>
+            </div>
+            <div class="modal-body">
+                <p><%=text%> <strong class="guid"><%=guid%></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-danger" onclick="<%=onclick_no%>"><%=title_no%></a>
+                <a href="#" class="btn btn-primary" onclick="<%=onclick_yes%>"><%=title_yes%></a>
+            </div>
+        </div>'
+
+        root.filter = ->
+            console.log "ZDev:  Start filtering." if debug is true
+            loader = "<div style=\"vertical-align: middle; margin: 80px 40%;\"><img src=\"/static/images/loader.gif\" style=\"height:64px\"/></div>"
+            $("#output").html loader
+            states = []
+            $(".btn-group .btn.active").each ->
+                states.push $(this).attr("cid")
+
+            $("#output").load "{% url filter %}",
+                db_name: $("#db_name").val()
+                obj_type: $("#obj_type").val()
+                hist_type: $("#hist_type").val()
+                task_num: $("#task_num").val()
+                states: states
+                from: $("#dp1").val()
+                till: $("#dp2").val()
+            , ->
+                prettyPrint()
+                $("#history").tablesorter cssChildRow: "expand-child"
+                console.log "ZDev:  Done." if debug is true
+
+        root.del = (guid) ->
+            console.log "ZDev:  Open del dialog." if debug is true
+            dialog = template(
+                title: "Удаление"
+                text: "Уверен что хочешь удалить запись"
+                guid: guid
+                onclick_no: "$('#dialog').modal('hide')"
+                title_no: "Нет"
+                onclick_yes: "modify_confirmed('del','"+guid+"')"
+                title_yes: "Да"
+            )
+            $("#dialogs").html dialog
+            $("#dialog").modal "show"
+
+
+        root.modify = (guid,current_state) ->
+            console.log "ZDev:  Open modify state dialog." if debug is true
+            $('option[value="pandora"]').show()
+            $('option[value="pandora"]').hide() if current_state != "accepted"
+            $("#modify_dialog .guid").html(guid)
+            $("#modify_dialog").modal "show"
+
+        root.modify_confirmed = (action,guid)->
+            window.location = "{% url modify %}"+action+'/'+guid
+
+        $("#db_name, #obj_type, #hist_type").change ->
+            root.filter()
+
+        root.show_guid = (guid) ->
+            console.log "ZDev:  Open guid dialog." if debug is true
+            $("#show_guid_dialog").modal "show"
+            $("#show_guid_dialog .guid").html guid
+
+        $ ->
+            console.log "ZDev:  Start binding events." if debug is true
+            $("body").on "click", "#state_filter .btn", ->
+                $(this).toggleClass "active"
+                root.filter()
+                $(this).toggleClass "active"
+
+            $("#dp1, #dp2").datepicker(weekStart: 1).on "changeDate", (ev) ->
+                root.filter()
+
+            $('#task_num').keypress (e) ->
+                root.filter()  if e.keyCode is 13
+
+            console.log "ZDev:  Done." if debug is true
+            root.filter()
+
+    {# </script> #}
+{% endblock endjs %}

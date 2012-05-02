@@ -1,0 +1,121 @@
+{% extends 'index.html' %}
+
+
+{% block content %}
+
+      <div id='login'>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </div>
+        {% endif %}
+
+    <form method="post" action="{% url registration.views.register %}" class="form-horizontal">
+        <fieldset>
+          <legend>Регистрация</legend>
+          <div class="control-group">
+            <label class="control-label" for="username">Логин</label>
+            <div class="controls">
+                {{ form.username }}
+                {% if form.username.errors %}
+                <script type="text/javascript">
+                        setError('username')
+                    </script>
+                <div class="help-block error">
+                    {{form.username.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="email">Email</label>
+            <div class="controls">
+                {{ form.email }}
+                {% if form.email.errors %}
+                <script type="text/javascript">
+                        setError('email')
+                    </script>
+                <div class="help-block error">
+                    {{form.email.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="password1">Пароль</label>
+            <div class="controls">
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                <script type="text/javascript">
+                setError('password1')
+                </script>
+                <div class="help-block error">
+                    {{form.password1.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="password2">Пароль еще раз</label>
+            <div class="controls">
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                <script type="text/javascript">
+                        setError('password2')
+                    </script>
+                <div class="help-block error">
+                    {{form.password2.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+
+
+        {% csrf_token %}
+
+                    <div class="control-group">
+            <label class="control-label" for="db_login">MySQL login</label>
+            <div class="controls">
+                {{ form.db_login }}
+                {% if form.db_login.errors %}
+                <script type="text/javascript">
+                        setError('db_login')
+                    </script>
+                <div class="help-block error">
+                    {{form.db_login.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="db_pass">MySQL password</label>
+            <div class="controls">
+                {{ form.db_pass }}
+                {% if form.db_pass.errors %}
+                <script type="text/javascript">
+                        setError('db_pass')
+                    </script>
+                <div class="help-block error">
+                    {{form.db_pass.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+
+                <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            <button type="reset" class="btn">Очистить</button>
+          </div>
+        </fieldset>
+
+        <input type="hidden" name="next" value="{{ next }}"/>
+    </form>
+    </div>
+
+
+
+{% endblock %}
+

@@ -1,0 +1,21 @@
+<div class="span12">
+<fieldset>
+<legend>Данные об изменении структуры БД</legend>
+	<ul>
+		<li><strong> Автор</strong> &mdash; {{hist.developer}}</li>
+		<li><strong> Тип записи </strong> &mdash; {{hist.pdm_sync_kind}}</li>
+		<li><strong> Номер таска </strong> &mdash; {{hist.task_num}}</li>
+		{% if hist.obj_type %}<li><strong> Тип объекта </strong> &mdash; {{hist.obj_type}}</li>{% endif %}
+		{% if hist.obj_name %}<li><strong> Имя объекта </strong> &mdash; {{hist.obj_name}}</li>{% endif %}
+		<li><strong> Состояние</strong> &mdash; {{hist.state_name}}</li>
+		{% if hist.ddl_body %}<li><strong> Запрос </strong> &mdash;<br>
+		<pre class="prettyprint well">{{hist.ddl_body}}</pre>
+		</li>{% endif %}
+		{% if hist.dev_comments %}<li><strong> Комментарий </strong> &mdash;<br>
+			<pre class='well'>{{hist.dev_comments}}</pre>
+		</li>{% endif %}
+		</ul>
+<div class="form-actions">
+	<button type="submit" class="btn" onclick="location = '{% url ddl_index %}'">Назад</button>
+	<button type="submit" class="btn" onclick="location = '{% url ddl_list %}'">К истории</button>
+</div>

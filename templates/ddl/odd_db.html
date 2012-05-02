@@ -1,0 +1,23 @@
+{% extends 'index.html' %}
+
+{% block title %}
+      Лишние базы
+{% endblock title %}
+
+{% block content %}
+
+<h2>Базы данных на сервере разработки, которые планируется удалить в ближайшее время</h2>
+{% if bases %}
+	<ul class='dbs'>
+		{% for base in bases %}
+		<li>{{base.SCHEMA_NAME}}</li>
+		{% endfor %}
+	</ul>
+{% else %}
+<p>
+	Ненужные базы удалены.
+</p>
+{% endif %}
+
+{% endblock %}
+

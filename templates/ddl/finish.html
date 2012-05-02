@@ -1,0 +1,33 @@
+{% extends "index.html" %}
+
+{% block title %}
+      DDL
+{% endblock title %}
+
+{% block content %}
+
+	<h1>Информация обновлена успешно.</h1>
+	<ul>
+		<li><strong> Логин </strong> &mdash; {{creds.db_login}}</li>
+		<li><strong> Имя базы </strong> &mdash; {{db_name}}</li>
+		<li><strong> Тип записи </strong> &mdash; {{hist_type}}</li>
+		<li><strong> Номер таска </strong> &mdash; {{task_num}}</li>
+		{% if obj_type %}<li><strong> Тип объекта </strong> &mdash; {{obj_type}}</li>{% endif %}
+		{% if obj_name %}<li><strong> Имя объекта </strong> &mdash; {{obj_name}}</li>{% endif %}
+		{% if ddl %}<li><strong> Запрос </strong> &mdash;<br>
+		<pre class="prettyprint well">{{ddl}}</pre>
+		</li>{% endif %}
+		{% if comment %}<li><strong> Комментарий </strong> &mdash;<br>
+			<pre class='well'>{{comment}}</pre>
+		</li>{% endif %}
+		{% if query %}
+		<li><strong> Вызов процедуры </strong> &mdash;<br>
+		<pre class="prettyprint well">{{query}}</pre>
+		</li>{% endif %}
+		</ul>
+<div class="form-actions">
+	<button type="submit" class="btn" onclick="location = '{% url ddl_index %}'">Назад</button>
+	<button type="submit" class="btn" onclick="location = '{% url ddl_list %}'">К истории</button>
+</div>
+
+{% endblock content %}

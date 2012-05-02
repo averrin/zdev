@@ -1,0 +1,30 @@
+{% extends "index.html" %}
+
+{% block title %}
+      Main
+{% endblock title %}
+
+{% block content %}
+
+<div class="row">
+	<div class="span8">
+		<h1>Добро пожаловать в <strong>ZDev</strong>.</h1>
+		{% if issues %}
+			<h2>В текущий релиз включены следующие таски:</h2>
+			<ul>
+				{% for task in issues %}
+					<li><a href="http://redmine.prog.zet/issues/{{task.redmine_id}}">#{{task.redmine_id}}</a> {{task.orig_ri_subj}}</li>
+				{% endfor %}
+			</ul>
+			<p>Более детальный отчет можно посмотреть в разделе "<a href="{% url r_list %}">Список файлов в релизе</a>"</p>
+		{% else %}
+			<p>Нет одобренных тасков.</p>
+		{% endif %}
+	</div>
+
+	{% include "navlist.html" %}
+
+</div>
+
+
+{% endblock content %}

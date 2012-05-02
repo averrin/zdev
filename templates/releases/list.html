@@ -1,0 +1,36 @@
+{% if log %}
+<h2>{{task.subject}} [<a href="http://redmine.prog.zet/issues/{{task_num}}">#{{task_num}}</a>]</h2>
+<pre style="height: 150px; overflow: auto">{{task.description}}</pre>
+
+	<h3>Коммиты</h3>
+	<ul>
+	{% for rev, hash, tag, branch, author, desc, send_date in log %}
+		<li><a href="https://dev-hg.zet/{{repo}}/rev/{{hash}}">{{rev}}</a> &mdash; {{desc}} </li>
+	{% endfor %}
+	</ul>
+	{% if files %}
+	<h3>Файлы</h3>
+	<form action="{% url r_save %}" method="POST">
+		<input type="hidden" value="{{task_num}}" name="task_num">
+		<input type="hidden" value="{{repo}}" name="repo">
+		<!-- csrf -->
+		{% csrf_token %}
+		<!-- end csrf -->
+	<ul class="unstyled" id="files">
+		{% for file, rev in files %}
+			<li> <input type="checkbox" checked value="{{rev}}" name='{{file}}'> {{file}} [<a href="https://dev-hg.zet/{{repo}}/file/{{rev}}/{{file}}">просмотр</a>]</li>
+		{% endfor %}
+	</ul>
+	      <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Отправить</button>
+            <button type="reset" class="btn">Очистить</button>
+          </div>
+	</form>
+	{% else %}
+		<p>Измененные файлы не найдены</p>
+	{% endif %}
+
+
+{% else %}
+	<p>Данные не найдены</p>
+{% endif %}

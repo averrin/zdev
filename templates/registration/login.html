@@ -1,0 +1,59 @@
+{% extends 'index.html' %}
+
+{% block content %}
+      <div id='login'>
+        {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </div>
+        {% endif %}
+
+    <form method="post" action="{% url django.contrib.auth.views.login %}" class="form-horizontal">
+        <fieldset>
+          <legend>Вход в систему</legend>
+          <div class="control-group">
+            <label class="control-label" for="db_name">Логин</label>
+            <div class="controls">
+                {{ form.username }}
+                {% if form.username.errors %}
+                <script type="text/javascript">
+                        setError('username')
+                    </script>
+                <div class="help-block error">
+                    {{form.username.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="obj_type">Пароль</label>
+            <div class="controls">
+                {{ form.password }}
+              {% if form.password.errors %}
+                <script type="text/javascript">
+                        setError('password')
+                    </script>
+                <div class="help-block error">
+                    {{form.password.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Войти</button>
+            <button type="button" class="btn" onclick="location='{% url registration.views.register %}'">Зарегистрироваться</button>
+          </div>
+        </fieldset>
+        {% csrf_token %}
+
+        <input type="hidden" name="next" value="{{ next }}"/>
+    </form>
+    </div>
+
+{% endblock %}
+
+
+

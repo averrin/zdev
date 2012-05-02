@@ -1,0 +1,19 @@
+{% extends 'index.html' %}
+
+
+{% block content %}
+
+    <div id="form">
+    <span class="formtitle">Регистрация завершена.
+</span>
+        <p>
+            Пользователь активирован.
+        </p>
+        <div class="form-actions">
+	<button type="submit" class="btn" onclick="location = '{% url profile %}'">Войти</button>
+</div>
+
+
+    </div>
+{% endblock %}
+

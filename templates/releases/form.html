@@ -1,0 +1,91 @@
+{% extends "index.html" %}
+
+{% block title %}
+    Добавление файлов в релиз
+{% endblock title %}
+
+{% block content %}
+
+    <div class="well">
+        <h2>Перед включением файлов в релиз, убедитесь, что это действие одобрено аналитиком!</h2>
+    </div>
+    <form class="form-horizontal" method="POST" id="files_form">
+        <fieldset>
+            <legend>Добавление файлов в релиз</legend>
+            <div class="control-group">
+                <label class="control-label" for="task_num">Номер таска</label>
+                <div class="controls">
+                    <div class="input-prepend">
+                        <span class="add-on">#</span><input class="span2" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' required>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="start_date">Начальная дата</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input class="span2" id="start_date" size="16" type="text" name='start_date' pattern='\d{2}\.\d{2}.\d{2}' required value="{{start_date}}" data-date-format="dd.mm.yy">
+                        <span class="add-on"> <i class="icon-calendar"></i> </span>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="branch">Репозиторий</label>
+                <div class="controls">
+                    <select name="repo" onchange="Dajaxice.releases.get_branches(Dajax.process,{'repo':this.value})">
+                        {% for repo in repos %}
+                            <option value="{{repo}}" {% if repo == "guiz" %}selected{% endif %}>{{repo}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="branch">Ветвь</label>
+                <div class="controls">
+                    <select name="branch" id="branch">
+                        {% for branch_name, rev, hash in branches %}
+                            <option value="{{branch_name}}">{{branch_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="optionsCheckboxList">Опции</label>
+                <div class="controls">
+                    <label class="checkbox">
+                        <input type="checkbox" name="hide_sql" value="1" checked>
+                        Исключить *.sql файлы
+                    </label>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Получить файлы</button>
+                <button type="reset" class="btn">Очистить</button>
+            </div>
+        </fieldset>
+        {% csrf_token %}
+    </form>
+
+    <div id="output"></div>
+
+{% endblock content %}
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+
+        $("#start_date").datepicker(weekStart: 1)
+
+        $("#files_form").submit (e) ->
+            console.log "ZDev:  Search commits." if debug is true
+            e.preventDefault()
+            loader = "<div style=\"vertical-align: middle; margin: 80px 40%;\"><img src=\"/static/images/loader.gif\" style=\"height:64px\"/></div>"
+            $("#output").html loader
+            data = $("#files_form").serialize()
+            Dajaxice.releases.get_files root.commits_callback, form:data
+
+        root.commits_callback = (data) ->
+            Dajax.process(data)
+            console.log "ZDev:  Done." if debug is true
+
+    {# </script> #}
+{% endblock endjs %}

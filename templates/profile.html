@@ -1,0 +1,139 @@
+{% extends "index.html" %}
+
+{% block title %}
+      Изменение данных профиля
+{% endblock title %}
+
+{% block content %}
+
+	<h1> Изменение данных профиля</h1>
+    {% if saved %}
+		<div class="alert alert-success">
+            Изменения сохранены.
+        </div>
+    {% endif %}
+
+	<div id='profile'>
+        {% if user_form.non_field_errors %}
+                <div class="alert alert-error">
+                    {% for error in login.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </div>
+        {% endif %}
+
+
+    <form method="post" action='{% url profile %}' class="form-horizontal">
+        <fieldset>
+          <legend>Данные пользователя</legend>
+          <div class="control-group">
+            <label class="control-label" for="username">Логин</label>
+            <div class="controls">
+                {{ user_form.username }}
+                {% if user_form.username.errors %}
+                <script type="text/javascript">
+                        $(function(){setError('username')})
+                    </script>
+                <div class="help-block error">
+                    {{user_form.username.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+                    <div class="control-group">
+            <label class="control-label" for="first_name">Имя</label>
+            <div class="controls">
+                {{ user_form.first_name }}
+                {% if user_form.first_name.errors %}
+                <script type="text/javascript">
+                        $(function(){setError('first_name')})
+                    </script>
+                <div class="help-block error">
+                    {{user_form.first_name.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+                    <div class="control-group">
+            <label class="control-label" for="last_name">Фамилия</label>
+            <div class="controls">
+                {{ user_form.last_name }}
+                {% if user_form.last_name.errors %}
+                <script type="text/javascript">
+                        $(function(){setError('last_name')})
+                    </script>
+                <div class="help-block error">
+                    {{user_form.last_name.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+                    <div class="control-group">
+            <label class="control-label" for="email">Почта</label>
+            <div class="controls">
+                {{ user_form.email }}
+                {% if user_form.email.errors %}
+                <script type="text/javascript">
+                        $(function(){setError('email')})
+                    </script>
+                <div class="help-block error">
+                    {{user_form.email.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+
+
+        {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </div>
+        {% endif %}
+
+
+    <form method="post" action='{% url profile %}' class="form-horizontal">
+        <fieldset>
+          <legend>Данные MySQL</legend>
+          <div class="control-group">
+            <label class="control-label" for="db_login">Логин к базе</label>
+            <div class="controls">
+                {{ form.db_login }}
+                {% if form.db_login.errors %}
+                <script type="text/javascript">
+                        $(function(){setError('db_login')})
+                    </script>
+                <div class="help-block error">
+                    {{form.db_login.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="db_password">Пароль к базе</label>
+            <div class="controls">
+                {{ form.db_password }}
+              {% if form.db_password.errors %}
+                <script type="text/javascript">
+                    $(function(){setError('db_password')})
+                    </script>
+                <div class="help-block error">
+                    {{form.db_password.errors}}
+                </div>
+                {% endif %}
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Отправить</button>
+            <button type="button" class="btn" onclick="location = '/'">Назад</button>
+          </div>
+        </fieldset>
+        {% csrf_token %}
+
+    </form>
+    </div>
+
+
+{% endblock content %}

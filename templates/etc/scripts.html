@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+
+{% block title %}
+      404
+{% endblock title %}
+
+{% block content %}
+
+<ul>
+	{% for parent in scripts %}
+		<li>{{parent.item_caption}}
+			{% if parent.childs %}
+			<ul>
+				{% for child in parent.childs %}
+					<li>{{child.item_caption}}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+		</li>
+	{% endfor %}
+</ul>
+
+{% endblock content %}

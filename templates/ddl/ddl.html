@@ -1,0 +1,92 @@
+{% extends "index.html" %}
+
+{% block title %}
+      DDL
+{% endblock title %}
+
+{% block content %}
+
+      <h1>Централизованный учёт структуры БД проектов</h1>
+      {% if guid and my or not guid %}
+
+      <p>В соответствии с <a href="http://wiki.i-zet.ru/index.php/%D0%A0%D0%B5%D0%B3%D0%BB%D0%B0%D0%BC%D0%B5%D0%BD%D1%82_%D0%B2%D0%BD%D0%B5%D1%81%D0%B5%D0%BD%D0%B8%D1%8F_%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D0%B9_%D0%B2_%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D1%83_%D0%91%D0%94">регламентом</a> изменения в структуру БД следует должным образом оформлять. <br>
+      </p>
+
+      <form class="form-horizontal" method="POST" action="{% url save_ddl %}">
+        <input type="hidden" value="{{guid}}" name="guid">
+        <fieldset>
+          <legend>Данные об изменении структуры БД</legend>
+          <div class="control-group">
+            <label class="control-label" for="db_name">Имя базы данных</label>
+            <div class="controls">
+              <select name="db_name" id="db_name" class="input-xlarge">
+                {% for base in bases %}
+                  <option value="{{base.db_name}}" {% if base.db_name == hist.db_name|default:'UTM' %} selected {% endif %}>{{base.db_name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="obj_type">Тип объекта БД</label>
+            <div class="controls">
+              <select name="obj_type" id="obj_type" class="input-xlarge">
+              {% for type in types %}
+                  <option value="{{type.obj_type}}" {% if type.obj_type == hist.obj_type|default:"no_type"%} selected {% endif %}>{{type.obj_type_desc}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+                    <div class="control-group">
+            <label class="control-label" for="hist_type">Тип записи</label>
+            <div class="controls">
+              <select name="hist_type" id="hist_type" class="input-xlarge">
+              {% for kind in kinds %}
+                  <option value="{{kind.pdm_sync_kind}}" {% if kind.pdm_sync_kind == hist.pdm_sync_kind%} selected {% endif %}>{{kind.pdm_sync_kind_desc}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="task_num">Номер таска</label>
+            <div class="controls">
+              <div class="input-prepend">
+                <span class="add-on">#</span><input class="span2" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' required value="{{hist.task_num}}">
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="obj_name">Имя объекта БД</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="obj_name" name="obj_name" value="{{hist.obj_name}}">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="ddl">Текст запроса</label>
+            <div class="controls">
+              <textarea type="text" class="input-xlarge span6" id="ddl" name="ddl">{{hist.ddl_body}}</textarea>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="comment">Комментарий</label>
+            <div class="controls">
+              <textarea type="text" class="input-xlarge span6" id="comment" name="comment">{{hist.dev_comments}}</textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Отправить</button>
+            <button type="reset" class="btn">Очистить</button>
+          </div>
+        </fieldset>
+        {% csrf_token %}
+      </form>
+
+      {% elif hist %}
+        {% include "ddl/view.html" %}
+      {% else %}
+      <p>Такой записи не существует!</p>
+        <div style="width: 100px; margin: 0 auto">
+          <button type="submit" class="btn btn-primary" onclick="location = '/'">На главную</button>
+        </div>
+      {% endif %}
+{% endblock content %}

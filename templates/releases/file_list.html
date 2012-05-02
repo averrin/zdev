@@ -1,0 +1,156 @@
+{% extends "index.html" %}
+
+{% block title %}
+      Список файлов релиза
+{% endblock title %}
+
+{% block content %}
+
+
+    <h1>Список файлов релиза</h1>
+<div class="page-header">
+    <h2>Файлы</h2>
+</div>
+{% if files %}
+<div class="well">
+    Для поиска по номеру таска введите номер и нажмите <code>Enter</code>.
+</div>
+    <div style="float: left">
+<div class="input-prepend" style="margin-left: 6px;
+width: 100px;
+display: inline-block;">
+    <span class="add-on">#</span><input class="input-mini" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+</div>
+<select name="repo" id="repo" style="margin-top: -24px;" class="input-medium" onchange="filter('#files',$(this).val(),'repo')">
+    <option value="">Репозиторий:</option>
+    {% for repo in repos %}
+        <option value="{{repo.rep_name}}">{{repo.rep_name}}</option>
+    {% endfor %}
+</select>
+<div style="
+    display: inline-block;
+    padding-bottom: 4px;
+">
+<label class="checkbox">
+    <input type="checkbox" id="is_accepted" name="is_accepted" value="Подтверждено" onchange="filter('#files',$(this).is(':checked') ? 'Подтверждено' : '', 'is_accepted')">
+    Только подтвержденные
+</label>
+</div>
+</div>
+
+<div class="right" style="margin-bottom: 6px;">
+    <button class="btn" id="plain" onclick="plain()">Список файлов в Plain text</button>
+</div>
+<table class="table table-bordered table-condensed" id="files">
+    <thead>
+        <th>Файл</th>
+        <th>Коммит</th>
+        <th>Репозиторий</th>
+        <th>Таск</th>
+        <th>Подтверждено</th>
+    </thead>
+    <tbody>{% for file in files %}
+        <tr>
+            <td><a href="https://dev-hg.zet/{{file.repo}}/file/{{file.changeset_num}}/{{file.full_file_name}}">{{file.full_file_name}}</a></td>
+            <td><a href="https://dev-hg.zet/{{file.repo}}/rev/{{file.changeset_num}}">{{file.changeset_num}}</a></td>
+            <td class="repo"><a href="https://dev-hg.zet/{{file.repo}}">{{file.repo}}</a></td>
+            <td class="tasknum"><a href="http://redmine.prog.zet/issues/{{file.redmine_id}}">#{{file.redmine_id}}</a> {{file.orig_ri_subj}}</td>
+            <td class="centred is_accepted">{% if file.is_accepted %}<i class="icon-ok"></i> <span class="hidden">Подтверждено</span>{% endif %}</td>
+        </tr>
+    {% endfor %}</tbody>
+</table>
+{% else %}
+<p>Нет файлов для отображения</p>
+{%endif%}
+
+<div class="page-header">
+    <h2>SQL
+        <small>Изменения только в статусах "Подтверждено" и "Добавлено в модель"</small>
+    </h2>
+</div>
+{% if sql %}
+    <div style="float: left">
+<div class="input-prepend" style="margin-left: 6px;
+width: 100px;
+display: inline-block;">
+    <span class="add-on">#</span><input class="input-mini" id="task_num_sql" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+</div>
+<select name="user" id="user" style="margin-top: -24px;" class="input-large" onchange="filter('#sql',$(this).val(),'developer')">
+    <option value="">Автор:</option>
+    {% for user in users %}
+        <option value="{{user.developer}}">{{user.developer}}</option>
+    {% endfor %}
+</select>
+</div>
+<table class="table table-bordered table-condensed" id="sql">
+    <thead>
+        <th>Тип</th>
+        <th>Объект</th>
+        <th>Комментарий</th>
+        <th>Таск</th>
+        <th>Автор</th>
+        <th>Состояние</th>
+        <th>DDL</th>
+    </thead>
+    <tbody>{% for s in sql %}
+        <tr>
+            <td>{{s.obj_type|default:""}}</td>
+            <td>{{s.obj_name|default:""}}</td>
+            <td>{{s.dev_comment|default:""}}</td>
+            <td class="tasknum">{% if s.redmine_id%}<a href="http://redmine.prog.zet/issues/{{s.redmine_id}}">#{{s.redmine_id}}</a> {{s.subject}} {%endif%}</td>
+            <td class="developer">{{s.developer}}</td>
+            <td class="{{s.cid}}">{{s.state_name}}</td>
+            <td>{{s.ddl_body_200|default:""}}</td>
+        </tr>
+    {% endfor %}</tbody>
+</table>
+{% else %}
+<p>Нет sql для отображения</p>
+{%endif%}
+
+<div class="modal" id="plain_dialog" style="display: none;">
+    <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h3>Список файлов</h3>
+    </div>
+    <div class="modal-body">
+        <pre id="list">
+
+        </pre>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" onclick="$('#plain_dialog').modal('hide')">Ok</a>
+    </div>
+</div>
+
+{% endblock content %}
+
+
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+        root = exports ? this
+
+        root.plain = ->
+            console.log "ZDev:  Get plain text list of files." if debug is true
+            files = []
+            $('#files tbody tr:visible').each ->
+                files.push $(this).children(':first-child').children().html()
+            $('#plain_dialog #list').html(files.join("\n"))
+            $('#plain_dialog').modal 'show'
+
+        root.filter = (id,val,target)->
+            # make multifiltering
+            console.log "ZDev:  Filter "+id+'. By field: "'+target+'" with value: '+val if debug is true
+            $(id+' tbody tr').hide()
+            $(id+' tbody tr td.'+target+':contains("'+val+'")').each ->
+                $(this).parent().show()
+
+        $("#files, #sql").tablesorter()
+        $('#task_num').keypress (e) ->
+            root.filter('#files',$(this).val(),'tasknum')  if e.keyCode is 13
+        $('#task_num_sql').keypress (e) ->
+            root.filter('#sql',$(this).val(),'tasknum')  if e.keyCode is 13
+
+    {# </script> #}
+{% endblock endjs %}

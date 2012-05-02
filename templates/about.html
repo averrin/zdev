@@ -1,0 +1,59 @@
+{% extends "index.html" %}
+
+{% block title %}
+      About
+{% endblock title %}
+
+{% block content %}
+
+<div id='about'>
+    <h2>Нафига это все?</h2>
+    <p>Ну мало ли какая мелкая штука понадобится, а тут бац и почти фреймворк. Лафа, согласитесь.</p>
+
+    <h2>Как это все?</h2>
+    <p>
+        Если же вам понадобилось что-то сюда добавить, то вот основные ссылочки:
+        <ul>
+            <li> <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a> <span class="label label-info">CSS</span> </li>
+            <li> <a href="http://www.djangoproject.com">Django</a> <span class="label label-success">Python</span> </li>
+            <!-- <li> <a href="http://jinja.pocoo.org/docs/">Jinja2</a> <span class="label label-warning">HTML</span> </li> -->
+            <li> <a href="http://lesscss.org">LESS</a> <span class="label label-info">CSS</span> </li>
+            <li> <a href="http://coffeescript.org/">CoffeeScript</a> <span class="label label-important">JS</span> </li>
+        </ul>
+    </p>
+    <p>
+        Что касается самого проекта, то структура обычная для Django-проектов версии 1.4:
+        <ul>
+            <li> Cтранички хранятся в <code>templates/*.html</code> </li>
+            <li> Статика в папке <code>static</code> </li>
+            <li> Код разбит на приложения в соответствии с логикой</li>
+        </ul>
+        Ознакомится с основами можно тут: <a href="https://docs.djangoproject.com/en/1.4/">Django Documentation</a>
+    </p>
+
+    <h2>Как, и это все?</h2>
+    <p>
+        Ну вообще, нет. Есть желание сделать <strong>ajax</strong>-навигацию на <code>Backbone + CoffeeScript</code>. У меня даже есть исходники, просто пока не приделывал. <br>
+        А еще с <strong>Bootstrap'ом</strong> хорошо идет <code>LESS</code>. <br>
+        Так что, если хочется поковырять няшки &mdash; здесь самое место, более того, уже даже все готово. Просто начинайте писать сразу в LESS или Coffee, а нужные библиотеки уже подцеплены.
+    </p>
+
+    <h2>Замечания</h2>
+    <ul>
+        <li>Если вы не нашли на этой страничек ответов на свои вопросы, то вот есть еще: <a href="{% url help %}" rel="tooltip" title="Пользовательская документация" class='doc'>ТЫЦ</a> и <a href="{% url develop %}"  rel="tooltip" title="Информация для разработчиков" class='doc'>ТЫЦ</a> </li>
+        <li>Если кто-то что-то делает - пишите комментарии, давайте сразу держать проект в порядке.</li>
+    </ul>
+
+    <h2>Копирайт</h2>
+    <p>
+        Автор: <a href="http://me.averr.in">Алексей "Averrin" Набродов</a>. <br> Специально для отдела программных разработок компании Интерзет. 2012.
+    </p>
+
+</div>
+{% endblock content %}
+
+{% block endjs %}
+
+        $('.doc').tooltip()
+
+{% endblock endjs %}

@@ -1,0 +1,20 @@
+Metadata-Version: 1.1
+Name: django-dajax
+Version: 0.8.4
+Summary: Easy to use library to create asynchronous presentation logic with django and dajaxice
+Home-page: http://dajaxproject.com
+Author: Benito Jorge Bastida Perez
+Author-email: jorge@thecodefarm.com
+License: UNKNOWN
+Download-URL: http://cloud.github.com/downloads/jorgebastida/django-dajax/django-dajax-0.8.4.tar.gz
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Utilities
+Requires: dajaxice (>=0.1.2)
