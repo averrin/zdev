@@ -1,0 +1,264 @@
+{% extends "index.html" %}
+
+{% block title %}
+        Полный список файлов
+{% endblock title %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Файлы</h1>
+</div>
+<div style="float: left">
+    <div class="input-prepend" style="margin-left: 6px; width: 100px;">
+        <span class="add-on" style="float: left">#</span><input class="input-mini" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+    </div>
+</div>
+<div class="form-inline">
+    <select name="repo" id="repo" style="" class="input-medium" onchange="filter()" data-placeholder="Репозиторий:">
+        <option value=""></option>
+        {% for repo in repos %}
+            <option value="{{repo.rep_name}}">{{repo.rep_name}}</option>
+        {% endfor %}
+    </select>
+    <select name="f_user" id="f_user" style="" class="input-large" onchange="filter()" data-placeholder="Автор:">
+        <option value=""></option>
+        {% for user in f_users %}
+            <option value="{{user.full_name}}">{{user.full_name}}</option>
+        {% endfor %}
+    </select>
+
+    <label class="checkbox">
+        <input type="checkbox" id="show_accepted" name="show_accepted" value="1" onchange="filter()">
+        Показать подтвержденные
+    </label>
+
+
+    <div class="right" style="margin-bottom: 6px; margin-left: 4px;">
+        <button class="btn" id="plain" onclick="plain()">Список файлов в Plain text</button>
+    </div>
+
+    <div class="btn-group right" id="states-group">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="javascript:">
+            Состояния
+            <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            {% for state in states %}
+            <li class="active" data-cid='{{state.cid}}'>
+                <a href="javascript:" onclick="toggle('{{state.cid}}')">{{state.state_name}}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <a href="javascript://" class="btn right" style="margin-bottom: 6px; margin-right: 4px;" onclick="only_new()">Новые</a>
+</div>
+
+<div id="output" style="margin: 10px 0px;">
+</div>
+
+<div class="well form-inline" id="statusbar">
+    Выделено: <span id="count_selected" style="margin-right: 10px">0</span>
+    <select name="mass_actions" id="mass_actions" disabled>
+        {% for state in states %}
+            {% if state.cid in allowed_states or is_task_accepter%}
+                <option value="{{state.cid}}">{{state.state_name}}</option>
+            {% endif %}
+        {% endfor %}
+        <option value="del">Удалить</option>
+        </select>
+        <button class="btn btn-primary" onclick="mass_modify_confirmed($('select#mass_actions').val())" id="apply_btn" disabled>Применить</button>
+</div>
+
+
+
+<div id="dialogs">
+    <!-- place for dialogs -->
+
+    <div class="modal" id="plain_dialog" style="display: none;">
+        <div class="modal-header">
+            <a class="close" data-dismiss="modal">×</a>
+            <h3>Список файлов</h3>
+        </div>
+        <div class="modal-body">
+            <pre id="list">
+
+            </pre>
+        </div>
+        <div class="modal-footer">
+            <a href="javascript:" class="btn btn-primary" onclick="$('#plain_dialog').modal('hide')">Ok</a>
+        </div>
+    </div>
+
+    <div class="modal" id="modify_dialog" style="display: none;">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3>Изменение состояния</h3>
+            </div>
+            <div class="modal-body">
+                <p>Объект: <strong class="guid"><%=guid%></strong></p>
+                <p>
+                    Изменить состояние на:
+                    <select name="state" id="state">
+                        {% for state in states %}
+                            {% if state.cid in allowed_states or is_task_accepter%}
+                                <option value="{{state.cid}}">{{state.state_name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:" class="btn btn-danger" data-dismiss="modal">Отмена</a>
+                <a href="javascript:" class="btn btn-primary" onclick="modify_confirmed($('#state').val(),$('#modify_dialog .guid span').html())">Сохранить</a>
+            </div>
+        </div>
+
+        <div class="modal" id="review_dialog" style="display: none;">
+        <div class="modal-header">
+            <a class="close" data-dismiss="modal">×</a>
+            <h3>Review [<span id="review_guid"></span>]</h3>
+        </div>
+        <div class="modal-body"><textarea style="width: 100%; height: 300px" id="review_text"></textarea></div>
+        <div class="modal-footer">
+            <a href="javascript:" class="btn btn-danger" data-dismiss="modal">Отмена</a>
+            <a href="javascript:" class="btn btn-primary" onclick="send_review()">Отправить</a>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+
+        root.only_new = () ->
+            console.log "ZDev:  Show only new files." if debug is true
+            $("#states-group li.active").removeClass('active')
+            $("#states-group li[data-cid='created']").addClass('active')
+            root.filter()
+
+        root.send_review = (guid) ->
+            $.post "{% url file_review %}",
+                guid: $("#review_guid").html()
+                text: $("#review_text").val()
+            , (data) ->
+                console.log "ZDev:  Review saved." if debug is true
+                window.location.reload()
+
+        root.review = (id) ->
+            tr = $('tr#'+id)
+            review = $('.review[guid="'+id+'"] pre').html()
+            $('#review_text').html review
+            $('#review_guid').html id
+            $('#review_dialog').modal 'show'
+
+        root.plain = ->
+            console.log "ZDev:  Get plain text list of files." if debug is true
+            files = []
+            $('#files tbody tr:visible').each ->
+                files.push $(this).children(':nth-child(2)').children().html()
+            $('#plain_dialog #list').html(files.join("\n"))
+            $('#plain_dialog').modal 'show'
+
+        root.filter = ()->
+            $("#output").html loader
+            states = []
+            $("#states-group li.active").each ->
+                states.push $(this).attr("data-cid")
+            console.log "ZDev:  Send filter files request" if debug is true
+            $('#output').load '{% url files_filter %}', tasknum: $('#task_num').val(),
+            repo: $('#repo').val(),
+            show_accepted: $('#show_accepted').is(':checked'),
+            user: $('#f_user').val(),
+            states: states
+            , ->
+                $("#files").tablesorter headers:  0:  sorter: false
+                $("#files tbody input:checkbox").click ->
+                    on_select()
+                $('#select_all').click ->
+                    if $('input[name="all"]').is(':checked') is false
+                        $("#files input:checkbox").removeAttr("checked")
+                    else
+                        $("#files input:checkbox").attr("checked","checked")
+                    on_select()
+            console.log "ZDev:  Filter files" if debug is true
+
+        root.filter()
+
+        root.on_select = ->
+            count = $('#files input:checkbox:checked').length
+            if count > 0
+                $('#mass_actions').removeAttr('disabled').trigger("liszt:updated")
+                $('#apply_btn').removeAttr('disabled').trigger("liszt:updated")
+            else
+                $('#mass_actions').attr('disabled','disabled').trigger("liszt:updated")
+                $('#apply_btn').attr('disabled','disabled').trigger("liszt:updated")
+            $('#count_selected').html(count)
+
+        $('#task_num').keypress (e) ->
+            root.filter('#files',$(this).val(),'tasknum')    if e.keyCode is 13
+
+
+        template = _.template '
+        <div class="modal" id="dialog" style="display: none;">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3><%=title%></h3>
+            </div>
+            <div class="modal-body">
+                <p><%=text%> <strong class="guid"><%=guid%></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:" class="btn btn-danger" onclick="<%=onclick_no%>"><%=title_no%></a>
+                <a href="javascript:" class="btn btn-primary" onclick="<%=onclick_yes%>"><%=title_yes%></a>
+            </div>
+        </div>'
+
+        root.del = (guid,name) ->
+            console.log "ZDev:  Open del dialog." if debug is true
+            dialog = template(
+                title: "Удаление"
+                text: "Уверен что хочешь удалить запись"
+                guid: '<span>'+guid+'</span>: '+name
+                onclick_no: "$('#dialog').modal('hide')"
+                title_no: "Нет"
+                onclick_yes: "modify_confirmed('del','"+guid+"')"
+                title_yes: "Да"
+            )
+            $("#dialogs").html dialog
+            $("#dialog").modal "show"
+
+
+        root.modify = (guid,current_state,name) ->
+            console.log "ZDev:  Open modify state dialog." if debug is true
+            $('option[value="pandora"]').show()
+            $('option[value="pandora"]').hide() if current_state != "accepted"
+            $("#modify_dialog .guid").html('<span>'+guid+'</span>: '+name)
+            $("#modify_dialog").modal "show"
+
+        root.modify_confirmed = (action,guid)->
+            $.get "{% url file_modify_t %}"+action+'/'+guid, ->
+                root.filter()
+
+        root.mass_modify_confirmed = (action)->
+            guids = []
+            $("#files input:checkbox:checked").each ->
+                guids.push $(this).attr('name')
+            $.post "{% url mass_modify %}",
+                guids: guids
+                action: action
+            , (data) ->
+                console.log "ZDev:  Mass modify saved." if debug is true
+                window.location.reload()
+
+        root.toggle = (cid) ->
+            $('li[data-cid="'+cid+'"]').toggleClass "active"
+            root.filter()
+
+        $('select[id!=state]').chosen allow_single_deselect: true
+
+    {# </script> #}
+{% endblock endjs %}

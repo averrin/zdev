@@ -6,6 +6,7 @@
 {% if history %}
 	<table class="table table-bordered table-condensed" id='history'>
 		<thead>
+			<tr>
 			<th>Дата</th>
 			<th>База</th>
 			<th style='display: none;'>Тип</th>
@@ -15,6 +16,7 @@
 			<th>Тип</th>
 			<th>Таск</th>
 			<th></th>
+			</tr>
 		</thead>
 		<tbody>
 		{% for hist in history %}
@@ -27,24 +29,33 @@
 			<td class={{hist.cid}} style="text-align: center"><strong>{{hist.state_name}}</strong></td>
 			<td>{{hist.pdm_sync_kind}}</td>
 			<td>{% if hist.redmine_id %}<a href="http://redmine.prog.zet/issues/{{hist.redmine_id}}">#{{hist.redmine_id}}</a>{% endif %}</td>
-			<td>
+			<td class='actions'>
 				<div class="btn-group">
-					  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+					  <a class="btn dropdown-toggle" data-toggle="dropdown" href="javascript:">
 					    Действия
 					    <span class="caret"></span>
 					  </a>
 					  <ul class="dropdown-menu">
-					  	<li><a href="{% url ddl_index hist.guid %}"><i class="icon-pencil"></i> Изменить</a></li>
-					    <li><a href="#" onclick="modify('{{hist.guid}}','{{hist.cid}}')"><i class="icon-fire"></i> Изменить состояние</a></li>
-					    <li><a href="#" onclick="show_guid('{{hist.guid}}')"><i class="icon-eye-open"></i> Посмотреть guid</a></li>
-					    <li><a href="#" onclick="del('{{hist.guid}}')"><i class="icon-remove"></i> Удалить</a></li>
+					  	<li><a href="/#!/ddl_index/{{hist.guid}}"><i class="icon-pencil"></i> Изменить</a></li>
+					    <li><a href="javascript:" onclick="modify('{{hist.guid}}','{{hist.cid}}')"><i class="icon-fire"></i> Изменить состояние</a></li>
+					    <li><a href="javascript:" onclick="show_guid('{{hist.guid}}')"><i class="icon-eye-open"></i> Посмотреть guid</a></li>
+					    <li><a href="javascript:" onclick="del('{{hist.guid}}')"><i class="icon-remove"></i> Удалить</a></li>
 					  </ul>
 				</div>
 			</td>
 		</tr>
+		{% if hist.review %}
+        <tr parent="{{hist.guid}}" class="expand-child {{hist.cid}}">
+          <td colspan=8>
+            <pre class="well">Code review:
+{{hist.review}}
+            </pre>
+          </td>
+        </tr>
+        {% endif %}
 		{% if hist.ddl_body %}
 			<tr class="expand-child {{hist.cid}}" parent="{{hist.guid}}">
-				<td colspan=8><pre class="prettyprint well">{{hist.ddl_body}}</pre></td>
+				<td colspan=8><pre class="prettyprint well linenums">{{hist.ddl_body}}</pre></td>
 			</tr>
 		{% endif %}
 	{% endfor %}
@@ -53,8 +64,8 @@
 
 	<div class="well">
 		Всего записей: <strong>{{history|length}}</strong>
-		<button type="button" class="btn" onclick="location = '#'" style="float:right;margin-top:-5px;">Вверх</button>
-		<button type="submit" class="btn" onclick="location = '{% url index %}'" style="float:right;margin-top:-5px;margin-right:4px;">На главную</button>
+		<!-- <button type="button" class="btn" onclick="location = '#!/ddl_list'" style="float:right;margin-top:-5px;">Вверх</button> -->
+		<!-- <button type="submit" class="btn" onclick="location = ''" style="float:right;margin-top:-5px;margin-right:4px;">На главную</button> -->
 	</div>
 {% else %}
 <br><br>

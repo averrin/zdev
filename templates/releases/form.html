@@ -7,11 +7,12 @@
 {% block content %}
 
     <div class="well">
-        <h2>Перед включением файлов в релиз, убедитесь, что это действие одобрено аналитиком!</h2>
+        <!-- <h2>Перед включением файлов в релиз, убедитесь, что это действие одобрено аналитиком!</h2> -->
+        <p>Файлы добавляются в систему перед заливкой на Пандору.</p>
     </div>
     <form class="form-horizontal" method="POST" id="files_form">
         <fieldset>
-            <legend>Добавление файлов в релиз</legend>
+            <legend>Добавление файлов в систему</legend>
             <div class="control-group">
                 <label class="control-label" for="task_num">Номер таска</label>
                 <div class="controls">
@@ -50,7 +51,7 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="optionsCheckboxList">Опции</label>
+                <label class="control-label" for="hide_sql">Опции</label>
                 <div class="controls">
                     <label class="checkbox">
                         <input type="checkbox" name="hide_sql" value="1" checked>
@@ -86,6 +87,8 @@
         root.commits_callback = (data) ->
             Dajax.process(data)
             console.log "ZDev:  Done." if debug is true
+
+        $('select').chosen()
 
     {# </script> #}
 {% endblock endjs %}

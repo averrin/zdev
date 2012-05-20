@@ -16,7 +16,7 @@
 					<li><a href="http://redmine.prog.zet/issues/{{task.redmine_id}}">#{{task.redmine_id}}</a> {{task.orig_ri_subj}}</li>
 				{% endfor %}
 			</ul>
-			<p>Более детальный отчет можно посмотреть в разделе "<a href="{% url r_list %}">Список файлов в релизе</a>"</p>
+			<p>Более детальный отчет можно посмотреть в разделе "<a href="/#!/files_release_files">Список файлов в релизе</a>"</p>
 		{% else %}
 			<p>Нет одобренных тасков.</p>
 		{% endif %}

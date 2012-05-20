@@ -35,7 +35,7 @@ table {
 	td {
 		vertical-align: middle;
 	}
-	td.pdm_stored {
+	td.ready_to_release {
 		color: @green;
 	}
 	td.accepted {
@@ -44,17 +44,20 @@ table {
 	td.created {
 		color: @orange;
 	}
-	td.tmp_rec {
+	td.in_progress {
 		color: @grayLight;
 	}
 	td.fast_upd {
 		color: @red;
 	}
+	td.pandora {
+		color: darken(@blue, 20%);
+	}
 	pre {
 		max-height: 412px;
 	}
 
-	tr.pdm_stored td {
+	tr.ready_to_release td {
 		background-color: @successBackground;
 	}
 	tr.accepted td {
@@ -63,7 +66,7 @@ table {
 	tr.pandora {
 		background-color: lighten(@orange, 30%);
 	}
-	tr.tmp_rec {
+	tr.in_progress {
 		background-color: lightgray;
 	}
 	tr.fast_upd {
@@ -137,4 +140,62 @@ tr.absent td{
 }
 td.centred{
 	text-align: center;
+}
+
+.task_inner {
+	padding-left: 20px;
+}
+
+tr.task_accepted{
+	background-color: @successBackground;
+}
+li.task_title{
+	padding-bottom: 6px !important;
+	span.title_num {
+		font-weight: bold;
+		font-size: 12pt;
+	}
+}
+
+li.task_accepted span.title{
+	color: @green;
+}
+
+td.actions{
+	min-width: 90px;
+}
+
+li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
+	list-style-type: decimal;
+}
+.linenums li:first-child:only-child {
+	list-style-type: none;
+}
+
+#states-group li a::before { content: "✗ " }
+#states-group li.active a::before { content: "✔ " }
+
+#states-group li.active a{ 
+	background-color: lighten(@green, 40%);
+	color: #444;
+}
+
+ol.linenums {
+	padding-left: 6px;
+}
+
+#count_selected {
+	font-weight: bold;
+}
+
+#files td, #sql td, #history td {
+	vertical-align: middle;
+}
+
+td.empty {
+	background-image: url(/static/img/stripe.png);
+}
+
+.chzn-single{
+	height: 25px !important;
 }

@@ -27,7 +27,7 @@
         <fieldset>
           <legend>Данные пользователя</legend>
           <div class="control-group">
-            <label class="control-label" for="username">Логин</label>
+            <label class="control-label" for="id_username">Логин</label>
             <div class="controls">
                 {{ user_form.username }}
                 {% if user_form.username.errors %}
@@ -41,7 +41,7 @@
             </div>
           </div>
                     <div class="control-group">
-            <label class="control-label" for="first_name">Имя</label>
+            <label class="control-label" for="id_first_name">Имя</label>
             <div class="controls">
                 {{ user_form.first_name }}
                 {% if user_form.first_name.errors %}
@@ -55,7 +55,7 @@
             </div>
           </div>
                     <div class="control-group">
-            <label class="control-label" for="last_name">Фамилия</label>
+            <label class="control-label" for="id_last_name">Фамилия</label>
             <div class="controls">
                 {{ user_form.last_name }}
                 {% if user_form.last_name.errors %}
@@ -69,7 +69,7 @@
             </div>
           </div>
                     <div class="control-group">
-            <label class="control-label" for="email">Почта</label>
+            <label class="control-label" for="id_email">Почта</label>
             <div class="controls">
                 {{ user_form.email }}
                 {% if user_form.email.errors %}
@@ -91,13 +91,11 @@
                     {% endfor %}
                 </div>
         {% endif %}
-
-
-    <form method="post" action='{% url profile %}' class="form-horizontal">
+        </fieldset>
         <fieldset>
           <legend>Данные MySQL</legend>
           <div class="control-group">
-            <label class="control-label" for="db_login">Логин к базе</label>
+            <label class="control-label" for="id_db_login">Логин к базе</label>
             <div class="controls">
                 {{ form.db_login }}
                 {% if form.db_login.errors %}
@@ -111,7 +109,7 @@
             </div>
           </div>
           <div class="control-group">
-            <label class="control-label" for="db_password">Пароль к базе</label>
+            <label class="control-label" for="id_db_password">Пароль к базе</label>
             <div class="controls">
                 {{ form.db_password }}
               {% if form.db_password.errors %}

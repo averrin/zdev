@@ -3,58 +3,65 @@
 	<ul class="nav nav-list">
 
 	  <li class="nav-header">
-	    ZDev
+		ZDev
 	  </li>
 	  <li>
-	    <a href="{% url index %}">Главная</a>
+		<a href="/">Главная</a>
 	  </li>
 	  <li>
-	    <a href="{% url profile %}">Профиль</a>
+		<a href="/#!/profile">Профиль</a>
 	  </li>
 
 	  <li class="nav-header">
-	    __pdm_sync
+		__pdm_sync
 	  </li>
 	  <li>
-	    <a href="{% url ddl_index %}">Отправка изменений</a>
+		<a href="/#!/ddl_index">Отправка изменений</a>
 	  </li>
 	  <li>
-	    <a href="{% url ddl_list %}">История изменений</a>
+		<a href="/#!/ddl_list">История изменений</a>
 	  </li>
 
 	  <li class="nav-header">
-	    Список баз
+		Список баз
 	  </li>
 	  <li>
-	    <a href="{% url abra_bases %}">Нужные базы</a>
+		<a href="/#!/abra_bases">Нужные базы</a>
 	  </li>
 	  <li>
-	    <a href="{% url odd_db %}">Лишние базы</a>
+		<a href="/#!/odd_db">Лишние базы</a>
 	  </li>
+	  <li><a href="/#!/add_db">Добавить базу</a></li>
 
 	  <li class="nav-header">
-	    Релизы
+		Релизы
 	  </li>
-	  <li><a href="{% url r_index %}">Добавить файлы</a></li>
-	  <li><a href="{% url r_list %}">Список файлов</a></li>
+	  <li><a href="/#!/files_send">Добавить файлы</a></li>
+	  <li><a href="/#!/files_personal_list">Список отправленных файлов</a></li>
+	  <li><a href="/#!/release_files">Список файлов релиза</a></li>
+	  <li><a href="/#!/tasks">Список тасков <span class="label label-info">beta</span></a></li>
+	  {% if is_task_accepter %}
+		<li><a href="/#!/files_total_list">Список всех файлов <span class="label label-important">admin</span></a></li>
+	  {% endif %}
 
 	  <li class="nav-header">
-	    Разное
+		Разное
 	  </li>
-	  <li><a href="{% url merge %}">Создание MERGE-сценариев</a></li>
+	  <li><a href="/#!/merge">Создание MERGE-сценариев <span class="label label-info">beta</span></a></li>
+	  <li><a href="/#!/scripts">Коллекция скриптов <span class="label label-info">beta</span></a></li>
 
 
 <!-- 	  <li class="nav-header">
-	    Справка
+		Справка
 	  </li>
 	  <li>
-	    <a href="{% url about %}">О системе</a>
+		<a href="/#!/about %}">О системе</a>
 	  </li>
 	  <li>
-	    <a href="{% url help %}">Пользовательская документация</a>
+		<a href="/#!/help %}">Пользовательская документация</a>
 	  </li>
 	  <li>
-	    <a href="{% url develop %}">Документация для разработчиков</a>
+		<a href="/#!/develop %}">Документация для разработчиков</a>
 	  </li> -->
 	</ul>
 	</div>

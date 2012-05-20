@@ -10,23 +10,27 @@
 
 <table class="table table-bordered table-condensed table-striped" id="abra_bases">
     <thead>
+        <tr>
         <th>Имя</th>
         <th>Описание</th>
         <th>Резервная копия</th>
         <th>Разработчик</th>
         <th>Дата создания</th>
         <th>Создавать backup</th>
+        <th>Актуальна до</th>
+        </tr>
     </thead>
     <tbody>
         {% for db in bases %}
-        <tr {% if db.db_is_absent %}class=absent{%endif%}>
-            <td><strong>{{db.db_name}}</strong></td>
-            <td>{{db.db_desc|default:''}}</td>
-            <td>{{db.backup_file_name|default:''}}</td>
-            <td>{{db.developer_name|default:''}}</td>
-            <td>{{db.create_time|date:'Y-m-d H:i:s'}}</td>
-            <td>{% if db.is_need_backup %}<i class="icon-ok"></i>{% endif %}</td>
-        </tr>
+            <tr {% if db.db_is_absent %}class=absent{%endif%}>
+                <td><strong>{{db.db_name}}</strong></td>
+                <td>{{db.db_desc|default:''}}</td>
+                <td>{{db.backup_file_name|default:''}}</td>
+                <td>{{db.developer_name|default:''}}</td>
+                <td>{{db.create_time|date:'Y-m-d H:i:s'}}</td>
+                <td>{% if db.is_need_backup %}<i class="icon-ok"></i>{% endif %}</td>
+                <td>{{db.actual|date:'Y-m-d H:i:s'}}</td>
+            </tr>
         {% endfor %}
     </tbody>
 </table>

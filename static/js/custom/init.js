@@ -1,10 +1,13 @@
         var a, b, c, d, e;
         d = $(".navbar .nav li[class!='dropdown'] a"), e = [];
+        set_location = function(){
         for (b = 0, c = d.length; b < c; b++)
             a = d[b], e.push(function(a) {
-                if (window.location.pathname === a.pathname)
+                $(a).parent().removeClass("active");
+                if (window.location.href === a.href)
                     return $(a).parent().toggleClass("active");
             }(a));
+        }
         // return e;
         jQuery(document).ajaxSend(function(event, xhr, settings) {
             function getCookie(name) {
@@ -42,3 +45,5 @@
                 xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
             }
         });
+
+        set_location();

@@ -5,19 +5,54 @@
 {% endblock title %}
 
 {% block content %}
+<div class="page-header">
+    <h1>Коллекция скриптов</h1>
+</div>
 
-<ul>
-	{% for parent in scripts %}
-		<li>{{parent.item_caption}}
-			{% if parent.childs %}
-			<ul>
-				{% for child in parent.childs %}
-					<li>{{child.item_caption}}</li>
-				{% endfor %}
-			</ul>
-			{% endif %}
-		</li>
-	{% endfor %}
-</ul>
+<div class="row">
+    <div id="scripts" class="span4">
+        <ul>
+            {% for guid, parent in scripts.items %}
+                <li id="{{guid}}"> <a href="#">{{parent.item_caption}}</a>
+                    {% if parent.childs %}
+                    <ul>
+                        {% for child in parent.childs %}
+                            <li id="{{child.guid}}"><a href="#">{{child.item_caption}}</a>
+                                <ul>
+                                    {% for child2 in child.childs %}
+                                        <li id="{{child2.guid}}"><a href="#">{{child2.item_caption}}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="span8">
+        <pre class='well prettyprint' id="output">
+            Выберете скрипт для отображения.
+        </pre>
+    </div>
+
+</div>
 
 {% endblock content %}
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+        $.jstree._themes = "/static/js/themes/"
+        $("#scripts").jstree(plugins: ["themes","html_data","ui","crrm","hotkeys"]).bind "select_node.jstree", (event, data) ->
+            loader = "<div style=\"vertical-align: middle; margin: 80px 40%;\"><img src=\"/static/images/loader.gif\" style=\"height:64px\"/></div>"
+            $("#output").html loader
+            Dajaxice.etc.get_script root.scripts_callback, guid: data.rslt.obj.attr "id"
+
+        root.scripts_callback = (data) ->
+            Dajax.process(data)
+            prettyPrint()
+            console.log "ZDev:  Done." if debug is true
+    {# </script> #}
+{% endblock endjs %}

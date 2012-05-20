@@ -12,7 +12,7 @@
       <p>В соответствии с <a href="http://wiki.i-zet.ru/index.php/%D0%A0%D0%B5%D0%B3%D0%BB%D0%B0%D0%BC%D0%B5%D0%BD%D1%82_%D0%B2%D0%BD%D0%B5%D1%81%D0%B5%D0%BD%D0%B8%D1%8F_%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D0%B9_%D0%B2_%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D1%83_%D0%91%D0%94">регламентом</a> изменения в структуру БД следует должным образом оформлять. <br>
       </p>
 
-      <form class="form-horizontal" method="POST" action="{% url save_ddl %}">
+      <form class="form-horizontal" method="POST" id="ddl_form">
         <input type="hidden" value="{{guid}}" name="guid">
         <fieldset>
           <legend>Данные об изменении структуры БД</legend>
@@ -50,7 +50,8 @@
             <label class="control-label" for="task_num">Номер таска</label>
             <div class="controls">
               <div class="input-prepend">
-                <span class="add-on">#</span><input class="span2" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' required value="{{hist.task_num}}">
+                <span class="add-on">#</span><input class="span2" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' required value="{{hist.task_num}}" {% if hist.task_num%} disabled=disabled {% endif %}>
+                {% if hist.task_num%} <p class="help-block">Извините, таск поменять невозможно</p> {% endif %}
               </div>
             </div>
           </div>
@@ -63,13 +64,14 @@
           <div class="control-group">
             <label class="control-label" for="ddl">Текст запроса</label>
             <div class="controls">
-              <textarea type="text" class="input-xlarge span6" id="ddl" name="ddl">{{hist.ddl_body}}</textarea>
+              <textarea class="input-xlarge span6" id="ddl" name="ddl">{{hist.ddl_body}}</textarea>
+              {% if hist.dev_comments%} <p class="help-block">Пожалуйста, используйте двойные кавычки. </p> {% endif %}
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="comment">Комментарий</label>
             <div class="controls">
-              <textarea type="text" class="input-xlarge span6" id="comment" name="comment">{{hist.dev_comments}}</textarea>
+              <textarea class="input-xlarge span6" id="comment" name="comment">{{hist.dev_comments}}</textarea>
             </div>
           </div>
 
@@ -90,3 +92,15 @@
         </div>
       {% endif %}
 {% endblock content %}
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+        $('select').chosen()
+
+        $('#ddl_form').submit (e) ->
+            e.preventDefault()
+            $.post "{% url save_ddl %}", $('#ddl_form').serialize(), ->
+                window.location = '/#!/ddl_list'
+
+    {# </script> #}
+{% endblock endjs %}

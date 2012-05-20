@@ -1,0 +1,67 @@
+{% if files %}
+<table class="table table-bordered table-condensed" id="files">
+    <thead>
+        <tr>
+        <th id="select_all"> <input type="checkbox" name='all'> </th>
+        <th>Файл</th>
+        <th>doc</th>
+        <th>repo@rev</th>
+        <th><i class="icon-ok"></i></th>
+        <th>Таск</th>
+        <th>Статус</th>
+        <th>Разработчик</th>
+        <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for file in files %}
+        <tr id="{{file.guid}}" data-cid="{{file.cid}}" class="file">
+            <td class="select"> <input type="checkbox" name='{{file.guid}}'> </td>
+            <td><a href="https://dev-hg.zet/{{file.repo}}/file/{{file.changeset_num}}/{{file.full_file_name}}">{{file.full_file_name}}</a></td>
+            <td {% if not file.doc %}class="empty"{% endif %}>{% if file.doc %}<a href="{{file.doc}}">doc</a>{% endif %}</td>
+            <td class="repo"><a href="https://dev-hg.zet/{{file.repo}}">{{file.repo}}</a>@<a href="https://dev-hg.zet/{{file.repo}}/rev/{{file.changeset_num}}">{{file.changeset_num}}</a></td>
+            <td class="centred is_accepted {% if not file.is_accepted %}empty{% endif %}">{% if file.is_accepted %}<i class="icon-ok"></i> <span class="hidden">Подтверждено</span>{% endif %}</td>
+            <td class="tasknum"><a href="http://redmine.prog.zet/issues/{{file.redmine_id}}">#{{file.redmine_id}}</a> {{file.orig_ri_subj}}</td>
+            <td class="{{file.cid}}">{{file.state_name}}</td>
+            <td class="developer"><span class="hidden">{{file.full_name}}</span>
+                {% autoescape off %}
+                    {{file.full_name_nb}}
+                {% endautoescape %}
+            </td>
+            <td class='actions'>
+                {% if is_task_accepter or file.developer == my_name %}
+                <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="javascript:">
+                        Действия
+                        <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                        <li><a href="javascript:" onclick="modify('{{file.guid}}','{{file.cid}}','{{file.full_file_name}}')"><i class="icon-fire"></i> Изменить состояние</a></li>
+                        {% if is_task_accepter%}
+                            <li><a href="javascript:" onclick="modify_confirmed('ready_to_release','{{file.guid}}')"><i class="icon-ok"></i> Подтвердить файл</a></li>
+                            <li><a href="javascript:" onclick="modify_confirmed('pandora','{{file.guid}}')"><i class="icon-ok"></i> Подтвердить на Пандору</a></li>
+                            <li><a href="javascript:" onclick="review('{{file.guid}}')"><i class="icon-pencil"></i> Review</a></li>
+                        {% endif %}
+                        <li><a href="{% url file_view file.repo file.changeset_num file.full_file_name %}" target="_blank"><i class="icon-eye-open"></i> Содержимое</a></li>
+                        <li><a href="javascript:" onclick="del('{{file.guid}}','{{file.full_file_name}}')"><i class="icon-remove"></i> Удалить</a></li>
+                        </ul>
+                </div>
+                {% endif %}
+            </td>
+
+        </tr>
+        {% if file.review %}
+        <tr data-cid="{{file.cid}}" class="review expand-child file" guid="{{file.guid}}" parent="{{hist.guid}}">
+            <td colspan=9>
+            <pre class="well">{{file.review}}</pre>
+            </td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+
+    <p>Нет данных</p>
+
+{% endif %}

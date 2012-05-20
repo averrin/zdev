@@ -1,0 +1,147 @@
+{% extends "index.html" %}
+
+{% block title %}
+      Таски в релиз
+{% endblock title %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Таски в релиз</h1>
+</div>
+<div class="well">
+    Для поиска по номеру таска введите номер и нажмите <code>Enter</code>.
+</div>
+    <div>
+<div class="input-prepend" style="margin-left: 6px;
+width: 100px;
+display: inline-block;">
+    <span class="add-on">#</span><input class="input-mini" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+</div>
+<div style="display: inline-block; float: right">
+    <input type="text" class="input-xmedium" id="search" name="search" placeholder='Поиск по тексту'>
+</div>
+<div style="
+    display: inline-block;
+    padding-bottom: 4px;
+">
+<label class="checkbox">
+    <input type="checkbox" id="is_accepted" name="is_accepted" value="Подтверждено" onchange="only_accepted()">
+    Только подтвержденные
+</label>
+</div>
+</div>
+<hr>
+<div id="tasks" class="">
+    <ul>
+    {% for task_num, task in output %}
+    <li class="task_title {% if task.is_accepted %}task_accepted{% endif %}" rel="task">
+        <span class="title">
+            <span class="title_num">#{{task_num}}</span> {{task.subj}} 
+            {% if task.is_accepted %}
+                [Подтверждено]
+            {% else %}
+                [<a href="{% url accept_task task_num %}">Подтвердить</a>]
+            {% endif %}
+        </span>
+    <ul>
+        <li><div class="task_inner">
+        <table class="table table-bordered table-condensed">
+            <thead>
+                <th>id</th>
+                <th>Таск</th>
+                <th>Автор</th>
+                <th>Назначена</th>
+            </thead>
+            <tbody>
+                <tr {% if task.is_accepted %}class="task_accepted"{% endif %}>
+                    <td><a href="http://redmine.prog.zet/issues/{{task_num}}">{{task_num}}</a></td>
+                    <td>{{task.subj}}</td>
+                    <td>{{task.author_name}}</td>
+                    <td>{{task.assigned_name}}</td>
+                </tr>
+            </tbody>
+        </table>
+                    {% if task.files %}
+                    <table class="table table-bordered table-condensed" id="files">
+                        <thead>
+                            <th>Имя файла</th>
+                            <th>Коммит</th>
+                            <th>Репозиторий</th>
+                            <th>Состояние</th>
+                        </thead>
+                        <tbody>
+                            {% for obj in task.files %}
+                                <tr>
+                                    <td>{{obj.full_file_name}}</td>
+                                    <td>{{obj.changeset_num}}</td>
+                                    <td>{{obj.repo}}</td>
+                                    <td class={{obj.cid}} style="text-align: center"><strong>{{obj.state_name}}</strong></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+
+                    {% if task.sql %}
+                    <table class="table table-bordered table-condensed" id="files">
+                        <thead>
+                            <th>База</th>
+                            <th>Объект</th>
+                            <th>Комментарий</th>
+                            <th>Состояние</th>
+                            <th>Тип</th>
+                        </thead>
+                        <tbody>
+                            {% for obj in task.sql %}
+                                <tr class={{obj.cid}} guid="{{obj.guid}}">
+                                    <td class='db'>{{obj.db_name}}</td>
+                                    <td class='hidden'>{{obj.obj_type|default:"NULL"}}</td>
+                                    <td>{% if obj.obj_type %}{{obj.obj_type}}: {% endif %}<strong>{{obj.obj_name}}</strong></td>
+                                    <td>{{obj.dev_comments|urlize}}</td>
+                                    <td class={{obj.cid}} style="text-align: center"><strong>{{obj.state_name}}</strong></td>
+                                    <td>{{obj.pdm_sync_kind}}</td>
+                                </tr>
+                                {% if obj.ddl_body %}
+                                    <tr class="expand-child {{obj.cid}}" parent="{{obj.guid}}">
+                                        <td colspan=6><pre class="prettyprint well">{{obj.ddl_body_200}}</pre></td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+        </div></li>
+</ul>
+</li>
+    {% endfor %}
+</ul>
+</div>
+
+
+{% endblock content %}
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+        $("#tasks").treeview collapsed: true
+
+        root.only_accepted = () ->
+            if $('#is_accepted').is(':checked') is true
+                $('li.task_title:not(".task_accepted")').hide()
+            else
+                $('li.task_title:not(".task_accepted")').show()
+
+        root.by_task_num = () ->
+            console.log "ZDev:  filter by task_num: "+$('#task_num').val() if debug is true
+            $('li.task_title').hide()
+            $('li.task_title .title_num:contains("#'+$('#task_num').val()+'")').parent().parent().show()
+            $('li.task_title .title_num:contains("#'+$('#task_num').val()+'")').parent().trigger('click')
+
+        $('#task_num').keypress (e) ->
+            root.by_task_num()  if e.keyCode is 13
+
+        $('#search').keyup (e) ->
+            console.log "ZDev:  filter by content: "+$('#search').val() if debug is true
+            $('li.task_title').hide()
+            $('li.task_title .title:contains("'+$('#search').val()+'")').parent().show()
+    {# </script> #}
+{% endblock endjs %}

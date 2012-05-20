@@ -6,13 +6,15 @@
 
 {% block content %}
 
-<h2>Список отправленных изменений</h2>
+<div class="page-header">
+    <h1>Список отправленных изменений</h1>
+</div>
     <div class="well">
         По умолчанию список отображает только сегодняшние изменения.<br>
         Для поиска по номеру таска введите номер и нажмите <code>Enter</code>.
     </div>
 <div class="btn-group" id="filter-group">
-    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="javascript:">
         Фильтры
         <span class="caret"></span>
     </a>
@@ -48,18 +50,19 @@
 &nbsp;&mdash;&nbsp;
 <input type="text" class="input-small" value="{% now 'd.m.y' %}" data-date-format="dd.mm.yy" id="dp2">
 </div>
-
-    <div class="btn-group" data-toggle="buttons-checkbox" id="state_filter" style="padding-top: 4px;">
+<div class="btn-group right" id="states-group">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="javascript:">
+        Состояния
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
         {% for state in states %}
-            <button class="btn active btn-mini" cid='{{state.cid}}'>{{state.state_name}}</button>
+        <li class="active" data-cid='{{state.cid}}'>
+            <a href="javascript:" onclick="toggle('{{state.cid}}')">{{state.state_name}}</a>
+        </li>
         {% endfor %}
-<!--         <button class="btn active" cid='created'>Инициировано</button>
-        <button class="btn active" cid='accepted'>Подтверждено</button>
-        <button class="btn active" cid='pdm_stored'>Записано в модель</button>
-        <button class="btn active" cid='tmp_rec'>Временная</button>
-        <button class="btn active" cid="fast_upd">Срочное</button>
-        <button class="btn active" cid="pandora">Пандора</button> -->
-    </div>
+    </ul>
+</div>
 <div style="float: left">
 <div class="input-prepend" style="margin-left: 6px;
 width: 100px;
@@ -89,16 +92,12 @@ display: inline-block;">
                                 <option value="{{state.cid}}">{{state.state_name}}</option>
                             {% endif %}
                         {% endfor %}
-<!--                         <option value="temp">Временная</option>
-                        <option value="fast">Срочная</option>
-                        <option value="normal">Новая</option>
-                        <option value="pandora">Установка на пандору</option> -->
                     </select>
                 </p>
             </div>
             <div class="modal-footer">
-                <a href="#" class="btn btn-danger" data-dismiss="modal">Отмена</a>
-                <a href="#" class="btn btn-primary" onclick="modify_confirmed($('#state').val(),$('#modify_dialog .guid').html())">Сохранить</a>
+                <a href="javascript:" class="btn btn-danger" data-dismiss="modal">Отмена</a>
+                <a href="javascript:" class="btn btn-primary" onclick="modify_confirmed($('#state').val(),$('#modify_dialog .guid').html())">Сохранить</a>
             </div>
         </div>
 </div>
@@ -113,7 +112,7 @@ display: inline-block;">
         <p>GUID: <strong class='guid'></strong></p>
     </div>
     <div class="modal-footer">
-        <a href="#" class="btn btn-primary" onclick="$('#show_guid_dialog').modal('hide')">Ok</a>
+        <a href="javascript:" class="btn btn-primary" onclick="$('#show_guid_dialog').modal('hide')">Ok</a>
     </div>
 </div>
 
@@ -132,8 +131,8 @@ display: inline-block;">
                 <p><%=text%> <strong class="guid"><%=guid%></strong>?</p>
             </div>
             <div class="modal-footer">
-                <a href="#" class="btn btn-danger" onclick="<%=onclick_no%>"><%=title_no%></a>
-                <a href="#" class="btn btn-primary" onclick="<%=onclick_yes%>"><%=title_yes%></a>
+                <a href="javascript:" class="btn btn-danger" onclick="<%=onclick_no%>"><%=title_no%></a>
+                <a href="javascript:" class="btn btn-primary" onclick="<%=onclick_yes%>"><%=title_yes%></a>
             </div>
         </div>'
 
@@ -142,8 +141,8 @@ display: inline-block;">
             loader = "<div style=\"vertical-align: middle; margin: 80px 40%;\"><img src=\"/static/images/loader.gif\" style=\"height:64px\"/></div>"
             $("#output").html loader
             states = []
-            $(".btn-group .btn.active").each ->
-                states.push $(this).attr("cid")
+            $("#states-group li.active").each ->
+                states.push $(this).attr("data-cid")
 
             $("#output").load "{% url filter %}",
                 db_name: $("#db_name").val()
@@ -181,7 +180,9 @@ display: inline-block;">
             $("#modify_dialog").modal "show"
 
         root.modify_confirmed = (action,guid)->
-            window.location = "{% url modify %}"+action+'/'+guid
+            $.get "{% url modify %}"+action+'/'+guid, ->
+                $("#dialog").modal "hide"
+                root.filter()
 
         $("#db_name, #obj_type, #hist_type").change ->
             root.filter()
@@ -205,6 +206,10 @@ display: inline-block;">
                 root.filter()  if e.keyCode is 13
 
             console.log "ZDev:  Done." if debug is true
+            root.filter()
+
+        root.toggle = (cid) ->
+            $('li[data-cid="'+cid+'"]').toggleClass "active"
             root.filter()
 
     {# </script> #}

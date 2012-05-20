@@ -1,0 +1,73 @@
+{% extends "index.html" %}
+
+{% block title %}
+      Добавление записи о базе данных
+{% endblock title %}
+
+{% block content %}
+
+{% if bases %}
+    <form class="form-horizontal" method="POST" id="db_form" action="{% url add_db %}">
+        <fieldset>
+            <legend>Добавление записи о базе данных</legend>
+          <div class="control-group">
+            <label class="control-label" for="db_name">Имя базы данных</label>
+            <div class="controls">
+              <select name="db_name" id="db_name" class="input-xlarge">
+                {% for base in bases %}
+                  <option value="{{base.SCHEMA_NAME}}">{{base.SCHEMA_NAME}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="db_desc">Описание</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="db_desc" name="db_desc" required>
+            </div>
+          </div>
+            <div class="control-group">
+                <label class="control-label" for="end_date">Актуальна до:</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input class="span2" id="end_date" size="16" type="text" name='end_date' pattern='\d{2}\.\d{2}.\d{2}' required value="{% now 'd.m.y' %}" data-date-format="dd.mm.yy">
+                        <span class="add-on"> <i class="icon-calendar"></i> </span>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="backup">Опции</label>
+                <div class="controls">
+                    <label class="checkbox">
+                        <input type="checkbox" name="backup" value="1">
+                        Делать резервную копию
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Отправить</button>
+                <button type="reset" class="btn">Очистить</button>
+            </div>
+        </fieldset>
+        {% csrf_token %}
+	</form>
+{% else %}
+    <p>Базу надо сначала создать.</p>
+{% endif %}
+
+{% endblock content %}
+
+{% block endjs %}
+    {# <script type="text/coffeescript"> #}
+
+        $('select').chosen()
+
+        $('#db_form').submit (e) ->
+            e.preventDefault()
+            $.post "{% url add_db %}", $('#db_form').serialize(), ->
+                window.location = '/#!/abra_bases'
+
+
+    {# </script> #}
+{% endblock endjs %}

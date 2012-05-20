@@ -6,48 +6,51 @@
 
 {% block content %}
 
-
     <h1>Список файлов релиза</h1>
 <div class="page-header">
-    <h2>Файлы</h2>
+    <h2>Файлы
+    <small>Только для подтвержденных тасков</small>
+</h2>
 </div>
 {% if files %}
 <div class="well">
     Для поиска по номеру таска введите номер и нажмите <code>Enter</code>.
 </div>
-    <div style="float: left">
-<div class="input-prepend" style="margin-left: 6px;
-width: 100px;
-display: inline-block;">
-    <span class="add-on">#</span><input class="input-mini" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+<div style="float: left">
+    <div class="input-prepend" style="margin-left: 6px;width: 100px;">
+        <span class="add-on left">#</span><input class="input-mini" id="task_num" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+    </div>
 </div>
-<select name="repo" id="repo" style="margin-top: -24px;" class="input-medium" onchange="filter('#files',$(this).val(),'repo')">
-    <option value="">Репозиторий:</option>
+<div class="form-inline">
+<select name="repo" id="repo" class="input-medium" onchange="filter('#files',$(this).val(),'repo')" data-placeholder="Репозиторий:">
+    <option value=""></option>
     {% for repo in repos %}
         <option value="{{repo.rep_name}}">{{repo.rep_name}}</option>
     {% endfor %}
 </select>
-<div style="
-    display: inline-block;
-    padding-bottom: 4px;
-">
-<label class="checkbox">
-    <input type="checkbox" id="is_accepted" name="is_accepted" value="Подтверждено" onchange="filter('#files',$(this).is(':checked') ? 'Подтверждено' : '', 'is_accepted')">
-    Только подтвержденные
-</label>
-</div>
-</div>
-
+<select name="f_user" id="f_user" class="input-large" onchange="filter('#files',$(this).val(),'developer')" data-placeholder="Автор:">
+    <option value=""></option>
+    {% for user in f_users %}
+        <option value="{{user.full_name}}">{{user.full_name}}</option>
+    {% endfor %}
+</select>
 <div class="right" style="margin-bottom: 6px;">
     <button class="btn" id="plain" onclick="plain()">Список файлов в Plain text</button>
 </div>
+</div>
+
+
 <table class="table table-bordered table-condensed" id="files">
     <thead>
+        <tr>
         <th>Файл</th>
         <th>Коммит</th>
         <th>Репозиторий</th>
         <th>Таск</th>
-        <th>Подтверждено</th>
+        <th>Статус</th>
+        <th>Разработчик</th>
+        <!-- <th><i class="icon-ok"></i></th> -->
+        </tr>
     </thead>
     <tbody>{% for file in files %}
         <tr>
@@ -55,7 +58,14 @@ display: inline-block;">
             <td><a href="https://dev-hg.zet/{{file.repo}}/rev/{{file.changeset_num}}">{{file.changeset_num}}</a></td>
             <td class="repo"><a href="https://dev-hg.zet/{{file.repo}}">{{file.repo}}</a></td>
             <td class="tasknum"><a href="http://redmine.prog.zet/issues/{{file.redmine_id}}">#{{file.redmine_id}}</a> {{file.orig_ri_subj}}</td>
-            <td class="centred is_accepted">{% if file.is_accepted %}<i class="icon-ok"></i> <span class="hidden">Подтверждено</span>{% endif %}</td>
+            <td class="{{file.cid}}">{{file.state_name}}</td>
+            <td class="developer">
+                {% autoescape off %}
+                    {{file.full_name}}
+                {% endautoescape %}
+            </td>
+            <!-- <td class="centred is_accepted">{% if file.is_accepted %}<i class="icon-ok"></i> <span class="hidden">Подтверждено</span>{% endif %}</td> -->
+
         </tr>
     {% endfor %}</tbody>
 </table>
@@ -65,18 +75,18 @@ display: inline-block;">
 
 <div class="page-header">
     <h2>SQL
-        <small>Изменения только в статусах "Подтверждено" и "Добавлено в модель"</small>
+        <small>Только подтвержденные изменения для подтвержденных тасков</small>
     </h2>
 </div>
 {% if sql %}
-    <div style="float: left">
-<div class="input-prepend" style="margin-left: 6px;
-width: 100px;
-display: inline-block;">
-    <span class="add-on">#</span><input class="input-mini" id="task_num_sql" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+<div style="float: left">
+    <div class="input-prepend" style="margin-left: 6px;width: 100px;">
+        <span class="add-on left">#</span><input class="input-mini" id="task_num_sql" size="16" type="text" name='task_num' pattern='\d{4,5}' placeholder='0000' style="margin-bottom: 0px">
+    </div>
 </div>
-<select name="user" id="user" style="margin-top: -24px;" class="input-large" onchange="filter('#sql',$(this).val(),'developer')">
-    <option value="">Автор:</option>
+<div class="form-inline">
+<select name="user" id="user" class="input-large" onchange="filter('#sql',$(this).val(),'developer')" data-placeholder="Автор:">
+    <option value=""></option>
     {% for user in users %}
         <option value="{{user.developer}}">{{user.developer}}</option>
     {% endfor %}
@@ -84,6 +94,7 @@ display: inline-block;">
 </div>
 <table class="table table-bordered table-condensed" id="sql">
     <thead>
+        <tr>
         <th>Тип</th>
         <th>Объект</th>
         <th>Комментарий</th>
@@ -91,6 +102,7 @@ display: inline-block;">
         <th>Автор</th>
         <th>Состояние</th>
         <th>DDL</th>
+        </tr>
     </thead>
     <tbody>{% for s in sql %}
         <tr>
@@ -98,7 +110,7 @@ display: inline-block;">
             <td>{{s.obj_name|default:""}}</td>
             <td>{{s.dev_comment|default:""}}</td>
             <td class="tasknum">{% if s.redmine_id%}<a href="http://redmine.prog.zet/issues/{{s.redmine_id}}">#{{s.redmine_id}}</a> {{s.subject}} {%endif%}</td>
-            <td class="developer">{{s.developer}}</td>
+            <td class="developer">{{s.assigned_name}} ({{s.developer}})</td>
             <td class="{{s.cid}}">{{s.state_name}}</td>
             <td>{{s.ddl_body_200|default:""}}</td>
         </tr>
@@ -108,19 +120,48 @@ display: inline-block;">
 <p>Нет sql для отображения</p>
 {%endif%}
 
-<div class="modal" id="plain_dialog" style="display: none;">
-    <div class="modal-header">
-        <a class="close" data-dismiss="modal">×</a>
-        <h3>Список файлов</h3>
-    </div>
-    <div class="modal-body">
-        <pre id="list">
 
-        </pre>
+<div id="dialogs">
+    <!-- place for dialogs -->
+
+    <div class="modal" id="plain_dialog" style="display: none;">
+        <div class="modal-header">
+            <a class="close" data-dismiss="modal">×</a>
+            <h3>Список файлов</h3>
+        </div>
+        <div class="modal-body">
+            <pre id="list">
+
+            </pre>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn btn-primary" onclick="$('#plain_dialog').modal('hide')">Ok</a>
+        </div>
     </div>
-    <div class="modal-footer">
-        <a href="#" class="btn btn-primary" onclick="$('#plain_dialog').modal('hide')">Ok</a>
-    </div>
+
+    <div class="modal" id="modify_dialog" style="display: none;">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3>Изменение состояния</h3>
+            </div>
+            <div class="modal-body">
+                <p>Объект: <strong class="guid"><%=guid%></strong></p>
+                <p>
+                    Изменить состояние на:
+                    <select name="state" id="state">
+                        {% for state in states %}
+                            {% if state.cid in allowed_states or is_task_accepter%}
+                                <option value="{{state.cid}}">{{state.state_name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-danger" data-dismiss="modal">Отмена</a>
+                <a href="#" class="btn btn-primary" onclick="modify_confirmed($('#state').val(),$('#modify_dialog .guid span').html())">Сохранить</a>
+            </div>
+        </div>
 </div>
 
 {% endblock content %}
@@ -129,7 +170,6 @@ display: inline-block;">
 
 {% block endjs %}
     {# <script type="text/coffeescript"> #}
-        root = exports ? this
 
         root.plain = ->
             console.log "ZDev:  Get plain text list of files." if debug is true
@@ -151,6 +191,49 @@ display: inline-block;">
             root.filter('#files',$(this).val(),'tasknum')  if e.keyCode is 13
         $('#task_num_sql').keypress (e) ->
             root.filter('#sql',$(this).val(),'tasknum')  if e.keyCode is 13
+
+
+        template = _.template '
+        <div class="modal" id="dialog" style="display: none;">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3><%=title%></h3>
+            </div>
+            <div class="modal-body">
+                <p><%=text%> <strong class="guid"><%=guid%></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-danger" onclick="<%=onclick_no%>"><%=title_no%></a>
+                <a href="#" class="btn btn-primary" onclick="<%=onclick_yes%>"><%=title_yes%></a>
+            </div>
+        </div>'
+
+        root.del = (guid,name) ->
+            console.log "ZDev:  Open del dialog." if debug is true
+            dialog = template(
+                title: "Удаление"
+                text: "Уверен что хочешь удалить запись"
+                guid: '<span>'+guid+'</span>: '+name
+                onclick_no: "$('#dialog').modal('hide')"
+                title_no: "Нет"
+                onclick_yes: "modify_confirmed('del','"+guid+"')"
+                title_yes: "Да"
+            )
+            $("#dialogs").html dialog
+            $("#dialog").modal "show"
+
+
+        root.modify = (guid,current_state,name) ->
+            console.log "ZDev:  Open modify state dialog." if debug is true
+            $('option[value="pandora"]').show()
+            $('option[value="pandora"]').hide() if current_state != "accepted"
+            $("#modify_dialog .guid").html('<span>'+guid+'</span>: '+name)
+            $("#modify_dialog").modal "show"
+
+        root.modify_confirmed = (action,guid)->
+            window.location = "{% url file_modify %}"+action+'/'+guid
+
+        $('select').chosen allow_single_deselect: true
 
     {# </script> #}
 {% endblock endjs %}
