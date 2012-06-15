@@ -40,12 +40,12 @@ var humanMsg = {
 		clearTimeout(humanMsg.t2);
 
 		// Inject message
-		$('#'+humanMsg.msgID+' p').html('<img class=msg_icon src="/images/'+status+'.png">'+msg);
+		$('#'+humanMsg.msgID+' p').html('<img class=msg_icon src="/static/images/'+status+'.png">'+msg);
 	
 		// Show message
 		$('#'+humanMsg.msgID+'').show().animate({ opacity: humanMsg.msgOpacity}, 200, function() {
 			$('#'+humanMsg.logID)
-				.show().children('ul').prepend('<li class='+status+'><img class=msg_icon src="/images/'+status+'.png">'+msg+'</li>')	// Prepend message to log
+				.show().children('ul').prepend('<li class='+status+'><img class=msg_icon src="/static/images/'+status+'.png">'+msg+'</li>')	// Prepend message to log
 				.children('li:first').slideDown(200);				// Slide it down
 		
 			if ( $('#'+humanMsg.logID+' ul').css('display') == 'none') {

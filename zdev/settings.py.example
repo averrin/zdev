@@ -15,6 +15,7 @@ FILE_CHARSET = 'utf-8'
 
 HG_ROOT = '/path/to/repositories'
 JS_DEBUG = True
+DOCS_FOLDERS = {'guiz': 'guiz_new_access'}
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),

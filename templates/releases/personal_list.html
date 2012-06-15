@@ -37,14 +37,14 @@
     </div>
 
     <div class="btn-group right" id="states-group">
-        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="javascript:">
             Состояния
             <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
             {% for state in states %}
             <li class="active" data-cid='{{state.cid}}'>
-                <a href="#" onclick="toggle('{{state.cid}}')">{{state.state_name}}</a>
+                <a href="javascript:" onclick="toggle('{{state.cid}}')">{{state.state_name}}</a>
             </li>
             {% endfor %}
         </ul>
@@ -66,25 +66,26 @@
     <tbody>{% for file in files %}
         <tr id="{{file.guid}}" data-cid="{{file.cid}}" class="file">
             <td><a href="https://dev-hg.zet/{{file.repo}}/file/{{file.changeset_num}}/{{file.full_file_name}}">{{file.full_file_name}}</a></td>
-            <td><a href="https://dev-hg.zet/{{file.repo}}/rev/{{file.changeset_num}}">{{file.changeset_num}}</a></td>
+            <td><a href="/#!/file_view/{{file.repo}}/{{file.changeset_num}}">{{file.changeset_num}}</a></td>
             <td class="repo"><a href="https://dev-hg.zet/{{file.repo}}">{{file.repo}}</a></td>
             <td class="tasknum"><a href="http://redmine.prog.zet/issues/{{file.redmine_id}}">#{{file.redmine_id}}</a> {{file.orig_ri_subj}}</td>
             <td class="{{file.cid}}">{{file.state_name}}</td>
             <td class="centred is_accepted {% if not file.is_accepted %}empty{% endif %}">{% if file.is_accepted %}<i class="icon-ok"></i> <span class="hidden">Подтверждено</span>{% endif %}</td>
                 <td class='actions'>
                 <div class="btn-group">
-                      <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                      <a class="btn dropdown-toggle" data-toggle="dropdown" href="javascript:">
                         Действия
                         <span class="caret"></span>
                       </a>
                       <ul class="dropdown-menu">
-                        <li><a href="#" onclick="modify('{{file.guid}}','{{file.cid}}','{{file.full_file_name}}')"><i class="icon-fire"></i> Изменить состояние</a></li>
+                        <li><a href="javascript:" onclick="modify('{{file.guid}}','{{file.cid}}','{{file.full_file_name}}')"><i class="icon-fire"></i> Изменить состояние</a></li>
                         {% if is_task_accepter%}
-                            <li><a href="#" onclick="modify_confirmed('ready_to_release','{{file.guid}}')"><i class="icon-ok"></i> Подтвердить файл</a></li>
-                            <li><a href="#" onclick="modify_confirmed('pandora','{{file.guid}}')"><i class="icon-ok"></i> Подтвердить на Пандору</a></li>
+                            <li><a href="javascript:" onclick="modify_confirmed('ready_to_release','{{file.guid}}')"><i class="icon-ok"></i> Подтвердить файл</a></li>
+                            <li><a href="javascript:" onclick="modify_confirmed('pandora','{{file.guid}}')"><i class="icon-ok"></i> Подтвердить на Пандору</a></li>
                         {% endif %}
-                        <li><a href="{% url file_view file.repo file.changeset_num file.full_file_name %}" target="_blank"><i class="icon-eye-open"></i> Содержимое</a></li>
-                        <li><a href="#" onclick="del('{{file.guid}}','{{file.full_file_name}}')"><i class="icon-remove"></i> Удалить</a></li>
+                        <li><a href="/#!/file_view/{{file.repo}}/{{file.changeset_num}}/{{file.path_escaped}}" target="_blank"><i class="icon-eye-open"></i> Содержимое</a></li>
+                        <li><a href="javascript:" onclick="update('{{file.guid}}')"><i class="icon-refresh"></i> Обновить</a></li>
+                        <li><a href="javascript:" onclick="del('{{file.guid}}','{{file.full_file_name}}')"><i class="icon-remove"></i> Удалить</a></li>
                       </ul>
                 </div>
                 </td>
@@ -118,7 +119,7 @@
             </pre>
         </div>
         <div class="modal-footer">
-            <a href="#" class="btn btn-primary" onclick="$('#plain_dialog').modal('hide')">Ok</a>
+            <a href="javascript:" class="btn btn-primary" onclick="$('#plain_dialog').modal('hide')">Ok</a>
         </div>
     </div>
 
@@ -141,8 +142,8 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <a href="#" class="btn btn-danger" data-dismiss="modal">Отмена</a>
-                <a href="#" class="btn btn-primary" onclick="modify_confirmed($('#state').val(),$('#modify_dialog .guid span').html())">Сохранить</a>
+                <a href="javascript:" class="btn btn-danger" data-dismiss="modal">Отмена</a>
+                <a href="javascript:" class="btn btn-primary" onclick="modify_confirmed($('#state').val(),$('#modify_dialog .guid span').html())">Сохранить</a>
             </div>
         </div>
 </div>
@@ -152,6 +153,11 @@
 {% block endjs %}
     {# <script type="text/coffeescript"> #}
         root = exports ? this
+
+        root.update = (guid) ->
+            $.get "{% url file_update %}"+guid, ->
+                root.filter()
+
 
         root.plain = ->
             console.log "ZDev:  Get plain text list of files." if debug is true
@@ -185,8 +191,8 @@
                 <p><%=text%> <strong class="guid"><%=guid%></strong>?</p>
             </div>
             <div class="modal-footer">
-                <a href="#" class="btn btn-danger" onclick="<%=onclick_no%>"><%=title_no%></a>
-                <a href="#" class="btn btn-primary" onclick="<%=onclick_yes%>"><%=title_yes%></a>
+                <a href="javascript:" class="btn btn-danger" onclick="<%=onclick_no%>"><%=title_no%></a>
+                <a href="javascript:" class="btn btn-primary" onclick="<%=onclick_yes%>"><%=title_yes%></a>
             </div>
         </div>'
 
@@ -213,7 +219,12 @@
             $("#modify_dialog").modal "show"
 
         root.modify_confirmed = (action,guid)->
-            window.location = "{% url file_modify %}"+action+'/'+guid
+            $.get("{% url file_modify %}"+action+'/'+guid).success(->
+                $("#dialogs .modal").modal "hide"
+                root.filter()
+            ).error( (data)->
+                show_error data.responseText
+            )
 
         root.filter_states = () ->
             states = []

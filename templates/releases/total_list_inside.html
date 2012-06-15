@@ -19,7 +19,7 @@
             <td class="select"> <input type="checkbox" name='{{file.guid}}'> </td>
             <td><a href="https://dev-hg.zet/{{file.repo}}/file/{{file.changeset_num}}/{{file.full_file_name}}">{{file.full_file_name}}</a></td>
             <td {% if not file.doc %}class="empty"{% endif %}>{% if file.doc %}<a href="{{file.doc}}">doc</a>{% endif %}</td>
-            <td class="repo"><a href="https://dev-hg.zet/{{file.repo}}">{{file.repo}}</a>@<a href="https://dev-hg.zet/{{file.repo}}/rev/{{file.changeset_num}}">{{file.changeset_num}}</a></td>
+            <td class="repo"><a href="https://dev-hg.zet/{{file.repo}}">{{file.repo}}</a>@<a href="/#!/file_view/{{file.repo}}/{{file.changeset_num}}">{{file.changeset_num}}</a></td>
             <td class="centred is_accepted {% if not file.is_accepted %}empty{% endif %}">{% if file.is_accepted %}<i class="icon-ok"></i> <span class="hidden">Подтверждено</span>{% endif %}</td>
             <td class="tasknum"><a href="http://redmine.prog.zet/issues/{{file.redmine_id}}">#{{file.redmine_id}}</a> {{file.orig_ri_subj}}</td>
             <td class="{{file.cid}}">{{file.state_name}}</td>
@@ -41,8 +41,10 @@
                             <li><a href="javascript:" onclick="modify_confirmed('ready_to_release','{{file.guid}}')"><i class="icon-ok"></i> Подтвердить файл</a></li>
                             <li><a href="javascript:" onclick="modify_confirmed('pandora','{{file.guid}}')"><i class="icon-ok"></i> Подтвердить на Пандору</a></li>
                             <li><a href="javascript:" onclick="review('{{file.guid}}')"><i class="icon-pencil"></i> Review</a></li>
+                            <li><a href="javascript:" onclick="clear_review('{{file.guid}}')"><i class="icon-remove"></i> Clear review</a></li>
                         {% endif %}
-                        <li><a href="{% url file_view file.repo file.changeset_num file.full_file_name %}" target="_blank"><i class="icon-eye-open"></i> Содержимое</a></li>
+                        <li><a href="/#!/file_view/{{file.repo}}/{{file.changeset_num}}/{{file.path_escaped}}" target="_blank"><i class="icon-eye-open"></i> Содержимое</a></li>
+                        <li><a href="javascript:" onclick="update('{{file.guid}}')"><i class="icon-refresh"></i> Обновить</a></li>
                         <li><a href="javascript:" onclick="del('{{file.guid}}','{{file.full_file_name}}')"><i class="icon-remove"></i> Удалить</a></li>
                         </ul>
                 </div>

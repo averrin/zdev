@@ -40,8 +40,9 @@ display: inline-block;">
             {% if task.is_accepted %}
                 [Подтверждено]
             {% else %}
-                [<a href="{% url accept_task task_num %}">Подтвердить</a>]
+                [<a href="javascript://" onclick="accept_task({{task_num}})">Подтвердить</a>] 
             {% endif %}
+            [<a href="javascript://" onclick="close_task({{task_num}})">Закрыть</a>] 
         </span>
     <ul>
         <li><div class="task_inner">
@@ -143,5 +144,18 @@ display: inline-block;">
             console.log "ZDev:  filter by content: "+$('#search').val() if debug is true
             $('li.task_title').hide()
             $('li.task_title .title:contains("'+$('#search').val()+'")').parent().show()
+
+        root.accept_task = (tasknum) ->
+            $.get("{% url accept_task %}"+tasknum).success(->
+                window.location.reload()
+            ).error( (data)->
+                show_error data.responseText
+            )
+        root.close_task = (tasknum) ->
+            $.get("{% url close_task %}"+tasknum).success(->
+                window.location.reload()
+            ).error( (data)->
+                show_error data.responseText
+            )
     {# </script> #}
 {% endblock endjs %}

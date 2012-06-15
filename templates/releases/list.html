@@ -10,7 +10,7 @@
 	</ul>
 	{% if files %}
 	<h3>Файлы</h3>
-	<form action="{% url r_save %}" method="POST">
+	<form onsubmit="return onsubmit_files()" method="POST" id="files">
 		<input type="hidden" value="{{task_num}}" name="task_num">
 		<input type="hidden" value="{{repo}}" name="repo">
 		<!-- csrf -->

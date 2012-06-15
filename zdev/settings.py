@@ -6,15 +6,16 @@ TEMPLATE_DEBUG = DEBUG
 DEBUG_PROPAGATE_EXCEPTIONS = False
 
 import os
-PROJECT_PATH = os.path.expanduser('/home/alexey.a.nabrodov//Dropbox/django_projects/zdev/')
+PROJECT_PATH = os.path.expanduser('/home/alexey.a.nabrodov/Dropbox/ZDev/')
 
 UTM_HOST = 'dev-hg.zet'
-UTM_NAME = 'UTM'
+UTM_NAME = 'zdev'
 DEFAULT_CHARSET = 'utf-8'
 FILE_CHARSET = 'utf-8'
 
 HG_ROOT = '/home/alexey.a.nabrodov/php_projects/'
 JS_DEBUG = True
+DOCS_FOLDERS = {'guiz': 'guiz_new_access'}
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -114,6 +115,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )

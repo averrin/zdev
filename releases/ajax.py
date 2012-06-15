@@ -3,11 +3,11 @@ from subprocess import *
 from dajax.core import Dajax
 from dajaxice.decorators import dajaxice_register
 from django.template.loader import render_to_string
-from zdev.settings import HG_ROOT, UTM_HOST
-import MySQLdb
 import os
-from urlparse import parse_qs
+from django.http import QueryDict
 from django.template import RequestContext
+from zdev.base import utmGet
+from zdev.settings import HG_ROOT
 
 
 @dajaxice_register
@@ -15,13 +15,12 @@ def get_files(request, form):
     """
         Return Dajax json for changed files by tasknum
     """
+    # form = {"task_num": "1800", "repo": "beta_building", "hide_sql": "1", "branch": "default", "csrfmiddlewaretoken": "TQ9OoZ0ciWUzqIquytVtL12eDmU4hKyq", "start_date": "01.01.12"}
     dajax = Dajax()
-    form = parse_qs(form)
-    for f in form:
-        form[f] = form[f][0]
+    form = QueryDict(form).dict()
     os.chdir(HG_ROOT + form['repo'])
     try:
-        os.system('hg pull')
+        os.system('hg pull')  # i hope this unnec[c]essary
     except:
         pass
     repo = hglib.open(HG_ROOT + form['repo'])
@@ -32,28 +31,24 @@ def get_files(request, form):
         branch=form['branch'],
         keyword='#%s' % form['task_num'])
 
-    db = MySQLdb.connect(host=UTM_HOST,
-             user='vmironov',
-             passwd='qq2',
-             db='redmine',
-             charset='cp1251')
-    cursor = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT * FROM redmine.issues where id = %s' %
-        form['task_num'])
-    task = cursor.fetchone()
+    query = 'SELECT * FROM redmine.issues where id = %s' % form['task_num']
+    task = utmGet(query, base='redmine')[0]
+
     files = []
     for commit in log:
         p = Popen(["hg", "log", "-M", "-r",
                 commit[0],
                 "--template",
                 "'{node}%{files}'"],
-            stdin=PIPE, stdout=PIPE)
-        rev, fs = p.communicate()[0].split('%')
-        files.append({'rev': rev.strip("'")[:12], 'files': []})
-        for f in fs.split(' '):
-            f = f.strip("'")
-            if ('hide_sql' in form and not f.endswith('.sql')) or 'hide_sql' not in form:
-                files[-1]['files'].append(f)
+            stdin=PIPE, stdout=PIPE)  # hglib's abilities so poor=(
+        resp = p.communicate()
+        if resp and resp[0]:
+            rev, fs = resp[0].split('%')
+            files.append({'rev': rev.strip("'")[:12], 'files': []})
+            for f in fs.split(' '):
+                f = f.strip("'")
+                if ('hide_sql' in form and not f.endswith('.sql')) or 'hide_sql' not in form:
+                    files[-1]['files'].append(f)
     file_list = {}
     for rev in files:
         for file_name in rev['files']:
@@ -88,4 +83,5 @@ def get_branches(request, repo):
         out = '<option>---</option>'
 
     dajax.assign('#branch', 'innerHTML', out)
+    dajax.script('$("#branch").trigger("liszt:updated")')
     return dajax.json()

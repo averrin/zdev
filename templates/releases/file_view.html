@@ -12,25 +12,11 @@
 </div>
 
 <pre class="prettyprint linenums">
-{% for line in output%}{{line}}
+{% for line in output%}<span class="nocode">{% autoescape off %}{{line.badge}}{% endautoescape %}</span>{{line.line}}
 {% endfor %}
 </pre>
 
 
-<!-- <div class="dialogs">
-            <div class="modal" id="review_dialog" style="display: none;">
-        <div class="modal-header">
-            <a class="close" data-dismiss="modal">×</a>
-            <h3>Review</h3>
-        </div>
-        <div class="modal-body">
-            <textarea style="width: 100%; height: 300px"></textarea>
-        </div>
-        <div class="modal-footer">
-            <a href="#" class="btn btn-primary" onclick="$('#review_dialog').modal('hide')">Ok</a>
-        </div>
-    </div>
-</div> -->
 {% endblock content %}
 
 {% block endjs %}

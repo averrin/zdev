@@ -6,6 +6,7 @@
 
 {% block content %}
 
+
 <div class="page-header">
     <h1>Файлы</h1>
 </div>
@@ -133,6 +134,12 @@
 
 {% block endjs %}
     {# <script type="text/coffeescript"> #}
+        root.update = (guid) ->
+            $.get("{% url file_update %}"+guid).success(->
+                root.filter()
+            ).error( (data)->
+                show_error data.responseText
+            )
 
         root.only_new = () ->
             console.log "ZDev:  Show only new files." if debug is true
@@ -140,13 +147,25 @@
             $("#states-group li[data-cid='created']").addClass('active')
             root.filter()
 
-        root.send_review = (guid) ->
+        root.clear_review = (guid) ->
             $.post "{% url file_review %}",
+                guid: guid
+                text: ''
+            , (data) ->
+                $("#dialogs .modal").modal "hide"
+                root.filter()
+
+        root.send_review = (guid) ->
+            $.post("{% url file_review %}",
                 guid: $("#review_guid").html()
                 text: $("#review_text").val()
-            , (data) ->
+            ).success((data) ->
                 console.log "ZDev:  Review saved." if debug is true
-                window.location.reload()
+                $("#dialogs .modal").modal "hide"
+                root.filter()
+            ).error( (data)->
+                show_error data.responseText
+            )
 
         root.review = (id) ->
             tr = $('tr#'+id)
@@ -169,7 +188,7 @@
             $("#states-group li.active").each ->
                 states.push $(this).attr("data-cid")
             console.log "ZDev:  Send filter files request" if debug is true
-            $('#output').load '{% url files_filter %}', tasknum: $('#task_num').val(),
+            $('#output').load '{% url files.filter %}', tasknum: $('#task_num').val(),
             repo: $('#repo').val(),
             show_accepted: $('#show_accepted').is(':checked'),
             user: $('#f_user').val(),
@@ -240,19 +259,26 @@
             $("#modify_dialog").modal "show"
 
         root.modify_confirmed = (action,guid)->
-            $.get "{% url file_modify_t %}"+action+'/'+guid, ->
+            $.get("{% url file_modify_t %}"+action+'/'+guid).success(->
+                $("#dialogs .modal").modal "hide"
                 root.filter()
+            ).error( (data)->
+                show_error data.responseText
+            )
 
         root.mass_modify_confirmed = (action)->
             guids = []
             $("#files input:checkbox:checked").each ->
                 guids.push $(this).attr('name')
-            $.post "{% url mass_modify %}",
+            $.post("{% url mass_modify %}",
                 guids: guids
                 action: action
-            , (data) ->
+            ).success((data) ->
                 console.log "ZDev:  Mass modify saved." if debug is true
                 window.location.reload()
+            ).error( (data)->
+                show_error data.responseText
+            )
 
         root.toggle = (cid) ->
             $('li[data-cid="'+cid+'"]').toggleClass "active"

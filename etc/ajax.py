@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 from dajax.core import Dajax
 from dajaxice.decorators import dajaxice_register
-from ddl.views import utmGet, connectUTM
+from zdev.base import utmGet, connectUTM
 from urlparse import parse_qs
 # import simplejson
 
@@ -24,6 +25,7 @@ def get_tables(request, base):
             out += "<option value='%s'>%s</option>" % (table, table)
 
     dajax.assign('#table_name', 'innerHTML', out)
+    dajax.script('$("#table_name").trigger("liszt:updated")')
     return dajax.json()
 
 
@@ -51,6 +53,8 @@ def get_fields(request, base, table):
 
     dajax.assign('#fields_ins', 'innerHTML', out)
     dajax.assign('#fields_upd', 'innerHTML', out)
+    dajax.script('$("#fields_ins").trigger("liszt:updated")')
+    dajax.script('$("#fields_upd").trigger("liszt:updated")')
     return dajax.json()
 
 
@@ -70,7 +74,27 @@ def get_query(request, form):
         form['db_name_target'][0]))
     # return simplejson.dumps(query)
     query = cursor.fetchall()
-    return simplejson.dumps(query)
+    # return simplejson.dumps(query)
     dajax.assign('#output', 'innerHTML', query)
     dajax.remove_css_class('#output', 'hidden')
+    return dajax.json()
+
+
+@dajaxice_register
+def get_script(request, guid):
+    """
+        Return Dajax json for fields of selected table
+    """
+    # import simplejson
+    # return simplejson.dumps('fafadf')
+    dajax = Dajax()
+    out = ''
+    query = """
+            SELECT item_body FROM __script_collection where guid = '%s'""" % (guid)
+    out = utmGet(query)[0]["item_body"]
+    out = out.replace("\n", "<br>")
+    if not out:
+        out = 'Body is empty.'
+
+    dajax.assign('#output', 'innerHTML', out)
     return dajax.json()

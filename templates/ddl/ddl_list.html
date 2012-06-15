@@ -180,9 +180,12 @@ display: inline-block;">
             $("#modify_dialog").modal "show"
 
         root.modify_confirmed = (action,guid)->
-            $.get "{% url modify %}"+action+'/'+guid, ->
-                $("#dialog").modal "hide"
+            $.get("{% url modify %}"+action+'/'+guid).success(->
+                $("#dialogs .modal").modal "hide"
                 root.filter()
+            }.error( (data)->
+                show_error data.responseText
+            )
 
         $("#db_name, #obj_type, #hist_type").change ->
             root.filter()

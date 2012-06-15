@@ -14,15 +14,15 @@
         <li><a href="/">Главная</a></li>
         {% if user.is_authenticated %}
         <li class="dropdown">
-        <a href="#ddl_dropdown"
+        <a href="#ddl.dropdown"
             class="dropdown-toggle"
             data-toggle="dropdown">
             Изменения БД
             <b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <li><a href="/#!/ddl_index">Отправка изменений</a></li>
-          <li><a href="/#!/ddl_list">История изменений</a></li>
+          <li><a href="/#!/ddl.index">Отправка изменений</a></li>
+          <li><a href="/#!/ddl.list">История изменений</a></li>
         </ul>
         </li>
         <li class="dropdown">
@@ -33,12 +33,12 @@
             <b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <li><a href="/#!/files_send">Добавить файлы</a></li>
-          <li><a href="/#!/files_personal_list">Список отправленных файлов</a></li>
+          <li><a href="/#!/files.send">Добавить файлы</a></li>
+          <li><a href="/#!/files.personal_list">Список отправленных файлов</a></li>
           <li><a href="/#!/release_files">Список файлов релиза</a></li>
           <li><a href="/#!/tasks">Список тасков <span class="label label-info">beta</span></a></li>
           {% if is_task_accepter %}
-            <li><a href="/#!/files_total_list">Список всех файлов <span class="label label-important">admin</span></a></li>
+            <li><a href="/#!/files.total_list">Список всех файлов <span class="label label-important">admin</span></a></li>
           {% endif %}
         </ul>
         </li>
@@ -68,19 +68,6 @@
           <li><a href="/#!/scripts">Коллекция скриптов <span class="label label-info">beta</span></a></li>
         </ul>
         </li>
-<!--         <li class="dropdown">
-        <a href="##"
-            class="dropdown-toggle"
-            data-toggle="dropdown">
-            Справка
-            <b class="caret"></b>
-        </a>
-        <ul class="dropdown-menu">
-          <li><a href="{% url help %}">Помощь</a></li>
-          <li><a href="{% url about %}">О системе</a></li>
-          <li><a href="{% url develop %}">Для разработчиков</a></li>
-        </ul>
-        </li> -->
         </ul>
         <ul class="nav pull-right">
         <li><a href="/#!/profile" class="styled">{{user}}{% if is_task_accepter %}

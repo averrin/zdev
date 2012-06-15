@@ -8,18 +8,31 @@ from ddl.views import utmGet
 @login_required
 @render('etc/scripts')
 def scripts(request):
-    _scripts = utmGet("""
+    scripts = utmGet("""
         SELECT guid, item_caption, selfparent_guid FROM __script_collection order by selfparent_guid
         """)
-    scripts = []
-    for script in _scripts:
-        if not script['selfparent_guid'] or script['selfparent_guid'] is None:
-            script['childs'] = []
-            scripts.append(script)
+    _scripts = {}
+    for i in scripts:
+        _scripts[i['guid']] = i
+    scripts = {}
+
+    for guid, item in _scripts.items():
+        if not item['selfparent_guid'] or item['selfparent_guid'] is None:
+            scripts[guid] = item
         else:
-            for parent in scripts:
-                if parent['guid'] == script['selfparent_guid']:
-                    parent['childs'].append(script)
+            parent = _scripts[item['selfparent_guid']]
+            if 'childs' not in parent:
+                parent['childs'] = []
+            parent['childs'].append(item)
+
+    # for script in _scripts:
+    #     if not script['selfparent_guid'] or script['selfparent_guid'] is None:
+    #         script['childs'] = []
+    #         scripts.append(script)
+    #     else:
+    #         for parent in scripts:
+    #             if parent['guid'] == script['selfparent_guid']:
+    #                 parent['childs'].append(script)
     return {'scripts': scripts}
 
 

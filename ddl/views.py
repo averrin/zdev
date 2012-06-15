@@ -11,39 +11,7 @@ from zdev.base import render
 from registration.models import MysqlCreds
 from forms import *
 from models import *
-import MySQLdb
-from zdev.settings import UTM_HOST, UTM_NAME
-
-
-def connectUTM(user, anonimous=False):
-    """
-        return connection for UTM base
-    """
-    if not anonimous:
-        user_db = MysqlCreds.objects.get(user=user)
-        db = MySQLdb.connect(host=UTM_HOST,
-                     user=user_db.db_login,
-                     passwd=user_db.db_password,
-                     db=UTM_NAME,
-                     charset='cp1251')
-    else:
-        db = MySQLdb.connect(host=UTM_HOST,
-                     user='vmironov',
-                     passwd='qq2',
-                     db=UTM_NAME,
-                     charset='cp1251')
-
-    return db
-
-
-def utmGet(query, user=""):
-    """
-        Execute query and return results
-    """
-    db = connectUTM(user, False if user else True)
-    cursor = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    cursor.execute(query)
-    return cursor.fetchall()
+from zdev.base import *
 
 
 def index(request):
@@ -81,31 +49,29 @@ def ddl_index(request, guid=''):
 
 @login_required
 @require_POST
-@render('ddl/finish')
 def save_ddl(request):
     """
         Call __pdm_add_change or UPDATE if guid in request.POST
     """
     if request.method == 'GET':
-        return redirect(index)
+        return responseFalse()
     elif request.method == 'POST':
         form = request.POST
-        db = connectUTM(request.user)
         input_data = {
             'creds': MysqlCreds.objects.get(user=request.user),
             'db_name': form['db_name'].encode('utf8'),
             'obj_type': form['obj_type'].encode('utf8').lower(),
             'obj_name': form['obj_name'].encode('utf8').lower(),
             'hist_type': form['hist_type'].encode('utf8').lower(),
-            'task_num': form['task_num'],
-            'ddl': form['ddl'].replace("'", '"'),
-            'comment': form['comment'].replace("'", '"')
+            'task_num': '' if not 'task_num' in form else form['task_num'],
+            'ddl': form['ddl'],
+            'comment': form['comment']
             }
-        cursor = db.cursor()
         if input_data['obj_type'] == 'null':
             input_data['obj_type'] = None
         if 'guid' in form and form['guid']:
             input_data['guid'] = form['guid']
+            input_data['ddl'] = input_data['ddl'].replace("'", "''")
             query = """
             UPDATE __pdm_sync set
              db_name = '%(db_name)s',
@@ -116,25 +82,21 @@ def save_ddl(request):
              dev_comments = '%(comment)s'
              where guid = '%(guid)s'
             """ % (input_data)
-            cursor.execute(query)
-            db.commit()
+            utmGet(query, commit=True)
         else:
-            cursor.callproc('__pdm_add_change', (
+            my_model().callProc('__pdm_add_change', (
                  input_data['db_name'], input_data['obj_type'], input_data['obj_name'],
-                 input_data['ddl'], input_data['comment'], input_data['hist_type'], input_data['task_num']))
-            cursor.close()
-            db.commit()
+                 input_data['ddl'], input_data['comment'], input_data['hist_type'], input_data['task_num']), user=request.user)
             data = {}
             for arg in input_data:
                 if input_data[arg]:
                     data[arg] = "'%s'" % input_data[arg]
                 else:
                     data[arg] = 'NULL'
-
             query = "call __pdm_add_change(%(db_name)s, %(obj_type)s, %(obj_name)s, %(ddl)s, %(comment)s)" % data
             input_data['query'] = query
 
-        return input_data
+        return responseTrue()
 
 
 @login_required
@@ -148,7 +110,7 @@ def ddl_list(request):
     types = utmGet('SELECT * FROM __pdm_sync_obj_types')
     kinds = utmGet('SELECT * FROM __pdm_sync_kinds')
     states = utmGet('SELECT * FROM __pdm_sync_state')
-    allowed_states = ['pandora', 'tmp_rec', 'created', 'fast_upd']
+    allowed_states = ['pandora', 'in_progress', 'created', 'fast_upd']
     return {'bases': bases, 'types': types, 'kinds': kinds, 'states': states, 'allowed_states': allowed_states}
 
 
@@ -175,41 +137,66 @@ def abra_bases(request):
         create_time,
         db_is_absent,
         concat(developer_name,' (',developer,')') as developer_name,
-        is_need_backup
+        is_need_backup,
+        date_actual_before as actual
         FROM vw_abra_bases ab
         order by db_name""")
     return {'bases': bases}
 
 
+@render('ddl/add_db')
+def add_db(request):
+    """
+        Add database to abra_bases
+    """
+    if request.method == 'GET':
+        bases = utmGet('''SELECT i.*, ab.db_name FROM information_schema.SCHEMATA i
+            LEFT JOIN UTM.abra_bases ab ON (ab.db_name = i.schema_name)
+            WHERE ab.db_name IS NULL''')
+        return {'bases': bases}
+    elif request.method == 'POST':
+        cred = MysqlCreds.objects.get(user=request.user)
+        args = {'developer': cred.db_login, 'backup': 1 if 'backup' in request.POST else 0}
+        args.update(request.POST.dict())
+        query = """
+            INSERT INTO abra_bases(db_name,db_desc,backup_file_name,developer,create_time,is_need_backup,date_actual_before ) VALUES(
+                '%(db_name)s',
+                '%(db_desc)s',
+                '%(db_name)s.sql.bz2',
+                '%(developer)s',
+                now(),
+                '%(backup)s',
+                str_to_date('%(end_date)s', '%%d.%%m.%%y')
+            )
+        """ % args
+        utmGet(query, commit=True)
+        return responseTrue()
+
+
 @login_required
-@render('ddl/ddl_modify')
 def ddl_modify(request, action, guid=''):
     """
         Modyfi change from pdm_sync
         guid = change id
         action in queries dict
+
+        @todo: refactor like file_modify
     """
     if guid:
         cred = MysqlCreds.objects.get(user=request.user)
-        db = connectUTM(request.user)
         queries = {'del': '''delete from __pdm_sync where guid = "%s" and developer = "%s"''' % (guid, cred.db_login),
         'fast_upd': '''update __pdm_sync set state_id = 5 where guid = "%s" and developer = "%s"''' % (guid, cred.db_login),
-        'tmp_rec': '''update __pdm_sync set state_id = 4 where guid = "%s" and developer = "%s"''' % (guid, cred.db_login),
+        'in_progress': '''update __pdm_sync set state_id = 7 where guid = "%s" and developer = "%s"''' % (guid, cred.db_login),
         'created': '''update __pdm_sync set state_id = 1 where guid = "%s" and developer = "%s"''' % (guid, cred.db_login),
         'pandora': '''update __pdm_sync set state_id = 6 where guid = "%s" and developer = "%s"''' % (guid, cred.db_login)}
-        cursor = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-        cursor.execute('''select * from __pdm_sync where guid = "%s" and developer = "%s"''' % (guid, cred.db_login))
-        hist = cursor.fetchone()
+        hist = utmGet('''select * from __pdm_sync where guid = "%s" and developer = "%s"''' % (guid, cred.db_login))
         if hist and action in queries:
-            cursor.execute(queries[action])
-            db.commit()
-            success = True
-            return redirect(ddl_list)
+            utmGet(queries[action], commit=True)
+            return responseTrue({'guid': guid})
         else:
-            success = False
-        return {'success': success, 'guid': guid}
+            return responseFalse()
     else:
-        return redirect(ddl_list)
+        return responseFalse()
 
 
 @login_required
@@ -247,16 +234,17 @@ def filter(request):
     if date_till:
         date_till = 'and change_time < date_add(str_to_date("%s", "%%d.%%m.%%y"), interval 1 day)' % date_till
 
-    query = """SELECT * FROM
-        vw_pdm_sync ps
-        where ps.developer = '%s'
-        %s
-        %s
-        %s
-        %s
-        %s
-        %s
-        %s
+    query = """
+        SELECT ps.*, comm.c_message as review FROM vw_pdm_sync ps
+            left join __pdm_sync_comments comm on (comm.ref_guid = ps.guid)
+            where ps.developer = '%s'
+            %s
+            %s
+            %s
+            %s
+            %s
+            %s
+            %s
         """ % (cred.db_login, db_name, obj_type, hist_type, task_num, date_from, date_till, states)
     history = utmGet(query)
     return {'history': history, 'query': query}

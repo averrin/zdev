@@ -5,6 +5,8 @@ from ddl.forms import MySQLCreds
 from registration.forms import UserForm
 from django.contrib.auth.decorators import login_required
 from ddl.views import utmGet
+from django.shortcuts import redirect
+from django.core.urlresolvers import reverse
 
 
 @render('404')
@@ -28,7 +30,7 @@ def profile(request):
         _devs = utmGet("""SELECT login FROM __developers""")
         devs = []
         for dev in _devs:
-            devs.append(dev['login'])
+            devs.append(dev[0])
         if user_form.is_valid() and mysql_form.is_valid():
             if mysql_form.cleaned_data['db_login'] in devs:
                 user_form.save()
@@ -51,3 +53,22 @@ def main(request):
     """
     issues = utmGet(query)
     return {'issues': issues}
+
+
+def go(request, page=""):
+    url = page.split('/')
+    page = url[0]
+    page = reverse('%s' % page, args=url[1:])
+    return redirect(page)
+
+
+@render('warper')
+def index(request):
+    return {}
+
+
+@render('redirect')
+def my_redirect(request, view_name=""):
+    view_name = '/#!/s%' % view_name if view_name else ''
+    return {'view_name': view_name}
+

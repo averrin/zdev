@@ -23,7 +23,7 @@
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
-    <!-- <link rel="stylesheet" href="/static/css/humanmsg.css"> -->
+    <link rel="stylesheet" href="/static/css/humanmsg.css">
 
     <link rel="stylesheet/less" href="/static/less/main.less">
     <script src="/static/js/less.js"></script>
@@ -61,6 +61,24 @@
     </div>
     <!-- /container -->
 
+    <!-- dialogs -->
+
+    <div class="modal" id="error_dialog" style="display: none;">
+        <div class="modal-header">
+            <a class="close" data-dismiss="modal">×</a>
+            <h3>Error 500</h3>
+        </div>
+        <div class="modal-body">
+            <pre id="traceback">
+
+            </pre>
+        </div>
+        <div class="modal-footer">
+            <a href="javascript:" class="btn btn-primary" onclick="$('#error_dialog').modal('hide')">Ok</a>
+        </div>
+    </div>
+    <!-- /dialogs -->
+
 
     {% dajaxice_js_import %}
     <script type="text/coffeescript">
@@ -68,7 +86,7 @@
     debug = {{JS_DEBUG|default:"false"}}
     loader = "<div style=\"vertical-align: middle; margin: 80px 40%;\"><img src=\"/static/images/loader.gif\" style=\"height:64px\"/></div>"
 
-    head.js "http://code.jquery.com/jquery-1.7.min.js", "/static/js/jquery.tablesorter.js", "/static/js/bootstrap.min.js", "/static/js/prettify.js", "/static/js/underscore.js", "/static/js/bootstrap-datepicker.js", "/static/js/jquery.dajax.core.js", "/static/js/custom/init.js", "/static/js/custom/main.js", "/static/js/jquery.jstree.js", "/static/js/jquery.hotkeys.js","/static/js/jquery.treeview.js","/static/js/chosen.jquery.min.js","/static/js/backbone.js", ->
+    head.js "http://code.jquery.com/jquery-1.7.min.js", "/static/js/jquery.tablesorter.js", "/static/js/bootstrap.min.js", "/static/js/prettify.js", "/static/js/underscore.js", "/static/js/bootstrap-datepicker.js", "/static/js/jquery.dajax.core.js", "/static/js/custom/init.js", "/static/js/custom/main.js", "/static/js/jquery.jstree.js", "/static/js/jquery.hotkeys.js","/static/js/jquery.treeview.js","/static/js/chosen.jquery.min.js","/static/js/backbone.js", "/static/js/humanmsg.js", "/static/js/easing.js", ->
         console.log "ZDev:  JS-libs loaded." if debug is true
     head.ready ->
         root = exports ? this
@@ -76,10 +94,19 @@
         root.load = (page) ->
             console.log "ZDev:  Fetch content." if debug is true
             $('#django_content').html(loader)
-            $('#django_content').load "{% url go %}"+page, ->
-                set_location()
-                CoffeeScript.run $('#django_content script').html()
-                console.log "ZDev:  Done." if debug is true
+            $('#django_content').load "{% url go %}"+page, (response, status, xhr) ->
+                if status != "error"
+                    set_location()
+                    CoffeeScript.run $('#django_content script').html()
+                    console.log "ZDev:  Done." if debug is true
+                else
+                    root.show_error(response)
+
+
+        root.show_error = (data) ->
+            console.log "ZDev:  Error 500." if debug is true
+            $('#error_dialog #traceback').html(data)
+            $('#error_dialog').modal 'show'
 
 
         root.Controller = Backbone.Router.extend
@@ -87,12 +114,25 @@
                 "": 'reset'
                 "!/:page": 'go'
                 "!/:page/:args": 'goo'
+                "!/:page/:args/:args2": 'gooo'
+                "!/:page/:args/:args2/:args3": 'goooo'
+                "!/:page/:args/:args2/:args3/:args4": 'gooooo'
+                "!/logout": "logout"
             goo: (page,args) ->
                 root.load(page+'/'+args)
+            gooo: (page,args,args2) ->
+                root.load(page+'/'+args+'/'+args2)
+            goooo: (page,args,args2,args3) ->
+                root.load(page+'/'+args+'/'+args2+'/'+args3)
+            gooooo: (page,args,args2,args3,args4) ->
+                root.load(page+'/'+args+'/'+args2+'/'+args3+'/'+args4)
             go: (page) ->
                 root.load(page)
             reset: ->
                 root.load("main")
+            logout: ->
+                $.get '/logout/', ->
+                    window.location = '/#!/login'
 
         root.controller = new Controller
         Backbone.history.start()

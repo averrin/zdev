@@ -26,19 +26,25 @@ urlpatterns = patterns('',
     url(r'^etc/', include('etc.urls')),
     url(r'^releases/', include('releases.urls')),
     url(r'^about/', TemplateView.as_view(template_name='about.html'), name='about'),
-    url(r'^$', 'zdev.views.main', name='index'),
+    url(r'^main/$', 'zdev.views.main', name='main'),
+    url(r'^$', 'zdev.views.index', name='index'),
     url(r'^help/', TemplateView.as_view(template_name='help.html'), name='help'),
     url(r'^develop/', TemplateView.as_view(template_name='develop.html'), name='develop'),
+    url(r'^redirect/(?P<view_name>.*)', 'zdev.views.my_redirect', name='redirect'),
 
     url(r'^profile/$', 'zdev.views.profile', name='profile'),
 
+    url(r'^go/$', 'zdev.views.go', name='go'),
+    url(r'^go/(?P<page>.*)$', 'zdev.views.go', name='go'),
+
 # account urls
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', {'login_url': '/accounts/login/'}, name='logout'),
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login', name="login"),
+    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
     url(r'^accounts/profile/$', RedirectView.as_view(url='/')),
     url(r'^registration/', include('registration.urls')),
     (r'^%s/' % settings.DAJAXICE_MEDIA_PREFIX, include('dajaxice.urls')),
 
 # Temp
     # url(r'^$', 'ddl.views.index', name='index'),
+    url(r'^lime/', include('lime.urls')),
 )

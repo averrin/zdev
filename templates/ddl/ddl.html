@@ -99,8 +99,15 @@
 
         $('#ddl_form').submit (e) ->
             e.preventDefault()
-            $.post "{% url save_ddl %}", $('#ddl_form').serialize(), ->
-                window.location = '/#!/ddl_list'
+            $.post("{% url save_ddl %}", $('#ddl_form').serialize()).success(->
+                {% if guid %}
+                notify 'DDL saved.', 'success'
+                {% else %}
+                window.location = "/#!/ddl.list"
+                {% endif %}
+            ).error( (data)->
+                show_error data.responseText
+            )
 
     {# </script> #}
 {% endblock endjs %}

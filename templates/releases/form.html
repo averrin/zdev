@@ -76,6 +76,12 @@
 
         $("#start_date").datepicker(weekStart: 1)
 
+        root.onsubmit_files = ->
+            console.log "ZDev:  Search commits." if debug is true
+            $.post "{% url files_save %}", $('#files').serialize(), (data)->
+                window.location = '/#!/files.personal_list'
+            return false
+
         $("#files_form").submit (e) ->
             console.log "ZDev:  Search commits." if debug is true
             e.preventDefault()

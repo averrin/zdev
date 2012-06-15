@@ -2,13 +2,14 @@ from django.conf.urls.defaults import patterns, url
 from views import *
 
 urlpatterns = patterns('ddl.views',
-    url(r'^$', 'index', name='ddl_index'),
+    url(r'^$', 'index', name='ddl.index'),
     # url(r'^$', 'index', name='index'),
-    url(r'^edit/([\w-]*)$', 'ddl_index', name='ddl_index'),
+    url(r'^edit/([\w-]*)$', 'ddl_index', name='ddl.index'),
     url(r'^save_ddl/$', 'save_ddl', name='save_ddl'),
-    url(r'^list/$', 'ddl_list', name='ddl_list'),
+    url(r'^list/$', 'ddl_list', name='ddl.list'),
     url(r'^odd_db/$', 'odd_db', name='odd_db'),
     url(r'^abra_bases/$', 'abra_bases', name='abra_bases'),
+    url(r'^add_db/$', 'add_db', name='add_db'),
     url(r'^filter/$', 'filter', name='filter'),
 
 
