@@ -1,0 +1,29 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<div id='about'>
+<div class="row">
+    <div class="span8">
+        <h2>Документация</h2>
+
+        <p>
+            blah-blah
+        </p>
+    </div>
+    <div class="span4">
+        <div class="well">
+            <ul class="nav nav-list">
+                <li>Blah</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block endjs %}
+
+        $('.doc').tooltip()
+
+{% endblock endjs %}

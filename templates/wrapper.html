@@ -1,0 +1,155 @@
+{% load dajaxice_templatetags %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ZDev [{% block title %}
+      Главная
+    {% endblock title %}]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Averrin">
+
+    <script src="/static/js/coffee-script.js"></script>
+    <script src="/static/js/head.js"></script>
+
+    <!-- Le styles -->
+    <link href="/static/css/prettify.css" type="text/css" rel="stylesheet" />
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/datepicker.css" rel="stylesheet">
+    <link href="/static/css/chosen.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link rel="stylesheet" href="/static/css/humanmsg.css">
+
+    <link rel="stylesheet/less" href="/static/less/main.less">
+    <script src="/static/js/less.js"></script>
+
+    <link href="/static/css/jquery.treeview.css" type="text/css" rel="stylesheet" />
+
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/static/images/favicon.png">
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/static/images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/images/apple-touch-icon-114x114.png">
+    <!-- <link href='http://fonts.googleapis.com/css?family=Averia+Gruesa+Libre' rel='stylesheet' type='text/css'> -->
+    <link href='http://fonts.googleapis.com/css?family=Fredericka+the+Great' rel='stylesheet' type='text/css'>
+    <!-- <link href='http://fonts.googleapis.com/css?family=Amaranth:400,700' rel='stylesheet' type='text/css'> -->
+
+
+  </head>
+
+  <body>
+
+    {% include "navbar.html" %}
+
+    <!-- container -->
+    <div class="container" id="django_content">
+
+      {% block content %}
+      {% endblock content %}
+
+    </div>
+    <!-- /container -->
+
+    <!-- dialogs -->
+
+    <div class="modal" id="error_dialog" style="display: none;">
+        <div class="modal-header">
+            <a class="close" data-dismiss="modal">×</a>
+            <h3>Error 500</h3>
+        </div>
+        <div class="modal-body">
+            <pre id="traceback">
+
+            </pre>
+        </div>
+        <div class="modal-footer">
+            <a href="javascript:" class="btn btn-primary" onclick="$('#error_dialog').modal('hide')">Ok</a>
+        </div>
+    </div>
+    <!-- /dialogs -->
+
+
+    {% dajaxice_js_import %}
+    <script type="text/coffeescript">
+
+    debug = {{JS_DEBUG|default:"false"}}
+    loader = "<div style=\"vertical-align: middle; margin: 80px 40%;\"><img src=\"/static/images/loader.gif\" style=\"height:64px\"/></div>"
+
+    head.js "http://code.jquery.com/jquery-1.7.min.js", "/static/js/jquery.tablesorter.js", "/static/js/bootstrap.min.js", "/static/js/prettify.js", "/static/js/underscore.js", "/static/js/bootstrap-datepicker.js", "/static/js/jquery.dajax.core.js", "/static/js/custom/init.js", "/static/js/custom/main.js", "/static/js/jquery.jstree.js", "/static/js/jquery.hotkeys.js","/static/js/jquery.treeview.js","/static/js/chosen.jquery.min.js","/static/js/backbone.js", "/static/js/humanmsg.js", "/static/js/easing.js", ->
+        console.log "ZDev:  JS-libs loaded." if debug is true
+    head.ready ->
+        root = exports ? this
+
+        root.load = (page) ->
+            console.log "ZDev:  Fetch content." if debug is true
+            $('#django_content').html(loader)
+            $('#django_content').load "{% url go %}"+page, (response, status, xhr) ->
+                if status != "error"
+                    set_location()
+                    CoffeeScript.run $('#django_content script').html()
+                    console.log "ZDev:  Done." if debug is true
+                else
+                    root.show_error(response)
+
+
+        root.show_error = (data) ->
+            console.log "ZDev:  Error 500." if debug is true
+            $('#error_dialog #traceback').html(data)
+            $('#error_dialog').modal 'show'
+
+
+        root.Controller = Backbone.Router.extend
+            # yes, its ugly =(
+            routes:
+                "": 'reset'
+                ":anchor": 'anchor'
+                "!/:page": 'go'
+                "!/:page/:args": 'goo'
+                "!/:page/:args/:args2": 'gooo'
+                "!/:page/:args/:args2/:args3": 'goooo'
+                "!/:page/:args/:args2/:args3/:args4": 'gooooo'
+                "!/logout": "logout"
+            goo: (page,args) ->
+                root.load(page+'/'+args)
+            gooo: (page,args,args2) ->
+                root.load(page+'/'+args+'/'+args2)
+            goooo: (page,args,args2,args3) ->
+                root.load(page+'/'+args+'/'+args2+'/'+args3)
+            gooooo: (page,args,args2,args3,args4) ->
+                root.load(page+'/'+args+'/'+args2+'/'+args3+'/'+args4)
+            go: (page) ->
+                root.load(page)
+            reset: ->
+                root.load("main")
+            logout: ->
+                $.get '/logout/', ->
+                    window.location = '/#!/login'
+            anchor: (anc) ->
+                console.log 'Proceed anchor ', anc if debug is true
+
+        root.controller = new Controller
+        Backbone.history.start()
+
+        prettyPrint()
+        set_location()
+
+        console.log "ZDev:  JS executed." if debug is true
+
+    </script>
+
+    <script type="text/coffeescript" src="/static/js/custom/cs.coffee"></script>
+
+
+  </body>
+</html>
